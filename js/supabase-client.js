@@ -1,25 +1,12 @@
 // js/supabase-client.js
-// Add this via <script> tag in every HTML page BEFORE any other scripts:
-// <script src="js/supabase-client.js"></script>
-// OR include inline at the bottom of each page's <body>
-
 // ============================================================
 // CONFIG — replace with your actual Supabase project values
 // ============================================================
 const SUPABASE_URL = 'https://cfqdyxfyxnbqfqptpyox.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmcWR5eGZ5eG5icWZxcHRweW94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjE4ODUsImV4cCI6MjA4OTc5Nzg4NX0.ZySccEvuJQ4nMrAwzvoDH8L3f2iW2mxHM8nR01FNmTs';
 
-// Load Supabase SDK dynamically if not already loaded
-(function loadSupabase() {
-  if (window.supabase) return;
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
-  script.onload = () => {
-    window._supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.dispatchEvent(new Event('supabase-ready'));
-  };
-  document.head.appendChild(script);
-})();
+// Create client immediately (synchronous)
+window._supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
 // AUTH HELPERS
@@ -413,7 +400,7 @@ const ProgressAPI = {
       .select('scheduled_date, actual_duration_mins')
       .eq('user_id', userId)
       .eq('status', 'completed')
-      .gte('scheduled_date', since.toISOString().split('T')[0']);
+      .gte('scheduled_date', since.toISOString().split('T')[0]);
 
     const map = {};
     (data || []).forEach(s => {
@@ -456,9 +443,7 @@ function showToast(msg, type = 'success') {
 }
 
 // ============================================================
-// GUARD: redirect to login if not authenticated
-// Call at the top of any protected page:
-//   Auth.requireAuth().then(user => { if (!user) return; ... });
+// EXPOSE ALL APIS GLOBALLY
 // ============================================================
 window.Auth = Auth;
 window.ProfileAPI = ProfileAPI;

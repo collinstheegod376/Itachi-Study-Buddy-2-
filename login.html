@@ -172,14 +172,10 @@
   <p class="text-center text-[11px] text-slate-600 mt-6">By continuing, you agree to the <a href="#" class="text-primary hover:underline">Terms of Service</a></p>
 </div>
 
+<!-- Scripts - ORDER MATTERS! Supabase SDK first, then our client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
 <script>
-  // Remove splash after animation
-  setTimeout(() => {
-    const splash = document.getElementById('splash');
-    if (splash) splash.style.display = 'none';
-  }, 4500);
-
   function switchTab(tab) {
     const loginForm = document.getElementById('form-login');
     const signupForm = document.getElementById('form-signup');
@@ -229,6 +225,12 @@
   }
 
   async function handleLogin() {
+    // Check if Auth is available
+    if (!window.Auth) {
+      showToast('Loading... Please try again in a moment', 'error');
+      return;
+    }
+    
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
     const btn = document.getElementById('login-btn');
@@ -245,7 +247,6 @@
       await Auth.signIn(email, password);
       showToast('Login successful! Redirecting...', 'success');
       
-      // Check if onboarding is complete
       const user = await Auth.getUser();
       const profile = await ProfileAPI.get(user.id);
       
@@ -264,6 +265,12 @@
   }
 
   async function handleSignup() {
+    // Check if Auth is available
+    if (!window.Auth) {
+      showToast('Loading... Please try again in a moment', 'error');
+      return;
+    }
+    
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
     const confirm = document.getElementById('signup-confirm').value;
@@ -288,7 +295,7 @@
     btn.disabled = true;
     
     try {
-      const { user, session } = await Auth.signUp(email, password);
+      await Auth.signUp(email, password);
       showToast('Account created! Please check your email to verify.', 'success');
       
       // Clear form
@@ -312,6 +319,11 @@
   }
 
   async function handleGoogleSignIn() {
+    if (!window.Auth) {
+      showToast('Loading... Please try again in a moment', 'error');
+      return;
+    }
+    
     try {
       await Auth.signInWithGoogle();
     } catch (err) {
@@ -320,6 +332,11 @@
   }
 
   async function handleForgotPassword() {
+    if (!window.Auth) {
+      showToast('Loading... Please try again in a moment', 'error');
+      return;
+    }
+    
     const email = document.getElementById('login-email').value;
     if (!email) {
       showToast('Please enter your email address first', 'error');
@@ -333,6 +350,21 @@
       showToast(err.message || 'Failed to send reset email', 'error');
     }
   }
+
+  // Wait for Auth to be ready, then remove splash
+  function waitForAuth() {
+    if (window.Auth && window._supabase) {
+      console.log('✅ Auth ready');
+      setTimeout(() => {
+        const splash = document.getElementById('splash');
+        if (splash) splash.style.display = 'none';
+      }, 4500);
+    } else {
+      setTimeout(waitForAuth, 100);
+    }
+  }
+  
+  waitForAuth();
 </script>
 </body>
 </html>
