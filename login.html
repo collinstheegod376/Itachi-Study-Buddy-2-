@@ -319,17 +319,29 @@
   }
 
   async function handleGoogleSignIn() {
-    if (!window.Auth) {
-      showToast('Loading... Please try again in a moment', 'error');
-      return;
-    }
-    
-    try {
-      await Auth.signInWithGoogle();
-    } catch (err) {
-      showToast(err.message || 'Google sign-in failed', 'error');
-    }
+  if (!window.Auth) {
+    showToast('Loading... Please try again in a moment', 'error');
+    return;
   }
+  
+  try {
+    // Use the correct redirect URL
+    const { error } = await window._supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard.html`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
+      }
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error('Google sign-in error:', err);
+    showToast('Google sign-in failed. Make sure OAuth is configured in Supabase.', 'error');
+  }
+}
 
   async function handleForgotPassword() {
     if (!window.Auth) {
@@ -366,5 +378,7 @@
   
   waitForAuth();
 </script>
+<!-- Add after the last script tag -->
+<script src="js/navigation.js"></script>
 </body>
 </html>

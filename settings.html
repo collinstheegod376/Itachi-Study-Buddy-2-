@@ -429,8 +429,28 @@
   
   initSettings();
 </script>
-<!-- Add this BEFORE supabase-client.js -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
+<script src="js/auth-guard.js"></script>
+<script src="js/navigation.js"></script>
+<script>
+  let currentUser = null;
+
+  async function initPage() {
+    currentUser = await requireAuth();
+    if (!currentUser) return;
+    
+    // Your existing page initialization code here
+    // For focus.html: initFocus()
+    // For progress.html: initProgress()
+    // For settings.html: initSettings()
+  }
+  
+  initPage();
+  
+  function toggleDark() { document.documentElement.classList.toggle('dark'); }
+</script>
+</body>
+</html>
 </body>
 </html>

@@ -261,8 +261,156 @@ async function addSubject() {
 initSubjects();
 
 </script>
-<!-- Add this BEFORE supabase-client.js -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
+<script src="js/auth-guard.js"></script>
+<script src="js/navigation.js"></script>
+<script>
+  let currentUser = null;
+  let subjectsList = [];
+
+  const allSubjects = [
+    "Advanced Calculus","Linear Algebra","Quantum Mechanics","Thermodynamics","Fluid Mechanics",
+    "Organic Chemistry","Biochemistry","Anatomy","Physiology","Pharmacology","Constitutional Law",
+    "Contract Law","Criminal Law","Computer Architecture","Data Structures","Machine Learning",
+    "Philosophy of Science","Sociology","Psychology","Economics","Statistics","Microbiology",
+    "Genetics","Cell Biology","Structural Analysis","Engineering Mathematics","Signal Processing",
+    "Digital Electronics","Control Systems","Operating Systems","Database Systems","Networking",
+    "Software Engineering","Artificial Intelligence","Cybersecurity","Web Development"
+  ];
+
+  async function initSubjects() {
+    currentUser = await requireAuth();
+    if (!currentUser) return;
+    
+    subjectsList = await SubjectsAPI.getAll(currentUser.id);
+    renderSubjects(subjectsList);
+  }
+
+  function renderSubjects(subjects) {
+    const container = document.getElementById('subjects-list');
+    if (!subjects || subjects.length === 0) {
+      container.innerHTML = '<div class="text-center py-12 text-slate-500">No subjects added yet. Click + to add your first subject.</div>';
+      return;
+    }
+    
+    container.innerHTML = subjects.map(sub => `
+      <div class="subject-card bg-[#191B22] p-6 rounded-xl border border-white/5">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-xl font-bold">${sub.name}</h3>
+            <span class="text-xs px-2 py-1 rounded ${getDifficultyClass(sub.difficulty)}">${sub.difficulty || 'medium'}</span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editSubject('${sub.id}', '${sub.name}')" class="p-2 rounded-lg bg-[#282a30] hover:bg-[#33343b]"><span class="material-symbols-outlined text-sm">edit</span></button>
+            <button onclick="deleteSubject('${sub.id}')" class="p-2 rounded-lg bg-[#282a30] hover:bg-red-500/10 hover:text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="flex justify-between text-sm mb-1">
+            <span>Coverage</span>
+            <span>${sub.coverage_pct || 0}%</span>
+          </div>
+          <div class="w-full bg-gray-700 rounded-full h-2">
+            <div class="bg-primary h-2 rounded-full" style="width: ${sub.coverage_pct || 0}%"></div>
+          </div>
+        </div>
+        <div class="mt-3 text-xs text-slate-500">${sub.days_remaining ? `${sub.days_remaining} days to exam` : 'No exam date set'}</div>
+      </div>
+    `).join('');
+  }
+
+  function getDifficultyClass(difficulty) {
+    switch(difficulty) {
+      case 'easy': return 'bg-emerald-500/10 text-emerald-400';
+      case 'hard': return 'bg-red-500/10 text-red-400';
+      default: return 'bg-amber-500/10 text-amber-400';
+    }
+  }
+
+  async function addSubject() {
+    const name = document.getElementById('new-subject-name')?.value;
+    if (!name) {
+      showToast('Please enter a subject name', 'error');
+      return;
+    }
+    
+    const examDate = document.querySelector('#add-modal input[type="date"]')?.value || null;
+    const totalTopics = parseInt(document.querySelector('#add-modal input[type="number"]')?.value) || 50;
+    const difficulty = document.querySelector('.diff-btn.active')?.dataset?.level || 'medium';
+    
+    try {
+      const subject = await SubjectsAPI.create(currentUser.id, { name, exam_date: examDate, total_topics: totalTopics, difficulty });
+      subjectsList.push(subject);
+      renderSubjects(subjectsList);
+      document.getElementById('add-modal').classList.add('hidden');
+      await SchedulerAPI.generate(currentUser.id);
+      showToast('Subject added & schedule updated!', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  async function deleteSubject(id) {
+    if (confirm('Delete this subject? This will also remove all related sessions.')) {
+      await SubjectsAPI.delete(id);
+      subjectsList = subjectsList.filter(s => s.id !== id);
+      renderSubjects(subjectsList);
+      showToast('Subject deleted', 'info');
+    }
+  }
+
+  function editSubject(id, name) {
+    document.getElementById('new-subject-name').value = name;
+    document.getElementById('add-modal').classList.remove('hidden');
+  }
+
+  function filterSubjectSearch(query) {
+    const dropdown = document.getElementById('subject-search-dropdown');
+    if (!query) { dropdown?.classList.add('hidden'); return; }
+    const matches = allSubjects.filter(s => s.toLowerCase().includes(query.toLowerCase()));
+    if (!matches.length) { dropdown?.classList.add('hidden'); return; }
+    if (dropdown) {
+      dropdown.innerHTML = matches.slice(0,6).map(s => `
+        <button onclick="selectSubject('${s}')" class="w-full text-left px-4 py-2.5 text-sm text-on-surface-variant hover:bg-[#282a30] transition-colors border-b border-white/5 last:border-0">${s}</button>
+      `).join('');
+      dropdown.classList.remove('hidden');
+    }
+  }
+
+  function selectSubject(name) {
+    document.getElementById('new-subject-name').value = name;
+    document.getElementById('subject-search-dropdown')?.classList.add('hidden');
+  }
+
+  function setDiff(btn, level) {
+    document.querySelectorAll('.diff-btn').forEach(b => b.style.opacity = '0.5');
+    btn.style.opacity = '1';
+    btn.dataset.level = level;
+  }
+
+  function setPriority(btn, level) {
+    document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('bg-primary/10', 'text-primary', 'border-primary/30'));
+    btn.classList.add('bg-primary/10', 'text-primary', 'border-primary/30');
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.createElement('div');
+    t.className = 'fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 bg-[#282a30] border border-white/10 rounded-full px-5 py-2.5 text-xs font-bold text-on-surface shadow-2xl z-[200] flex items-center gap-2';
+    t.innerHTML = `<span class="material-symbols-outlined text-primary text-[16px]">${type === 'error' ? 'error' : 'check_circle'}</span>${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  }
+
+  function toggleDark() { document.documentElement.classList.toggle('dark'); }
+
+  initSubjects();
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#new-subject-name') && !e.target.closest('#subject-search-dropdown')) {
+      document.getElementById('subject-search-dropdown')?.classList.add('hidden');
+    }
+  });
+</script>
 </body>
 </html>

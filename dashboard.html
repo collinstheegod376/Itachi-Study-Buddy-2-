@@ -375,5 +375,99 @@ initDashboard();
   function toggleDark() { document.documentElement.classList.toggle('dark'); }
   function toggleMobileMenu() { /* optional */ }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth-guard.js"></script>
+<script src="js/navigation.js"></script>
+<script>
+  // Remove bottom nav immediately
+  document.querySelectorAll('.md\\:hidden.fixed.bottom-0, .bottom-nav').forEach(el => el.remove());
+  
+  let currentUser = null;
+
+  async function initDashboard() {
+    currentUser = await requireAuth();
+    if (!currentUser) return;
+    
+    try {
+      const [todaySessions, streak, summary] = await Promise.all([
+        SessionsAPI.getToday(currentUser.id),
+        StreakAPI.get(currentUser.id),
+        ProgressAPI.getSummary(currentUser.id),
+      ]);
+      
+      // Update streak display
+      const streakValue = streak.current_streak || 0;
+      document.getElementById('streak-value').textContent = streakValue;
+      document.getElementById('streak-badge').textContent = `${streakValue} Day Streak`;
+      
+      // Update progress
+      const pct = summary.overall_coverage_pct || 0;
+      document.getElementById('progress-value').textContent = pct;
+      document.getElementById('progress-percent').textContent = `${pct}%`;
+      document.getElementById('topics-covered').textContent = summary.covered_topics || 0;
+      document.getElementById('topics-total').textContent = summary.total_topics || 0;
+      
+      // Update progress ring
+      const ring = document.getElementById('progress-ring');
+      const offset = 176 - (176 * pct / 100);
+      ring.setAttribute('stroke-dashoffset', offset);
+      
+      // Get nearest exam
+      if (summary.subjects && summary.subjects.length > 0) {
+        const nearest = summary.subjects[0];
+        document.getElementById('exam-name').textContent = `${nearest.days_remaining || '?'} DAYS UNTIL ${nearest.name?.toUpperCase() || 'EXAM'}`;
+        document.getElementById('exam-date').textContent = `Exam Date: ${nearest.exam_date ? new Date(nearest.exam_date).toLocaleDateString() : 'TBD'}`;
+      }
+      
+      // Render today's sessions
+      renderSessions(todaySessions);
+      
+    } catch (err) {
+      console.error('Dashboard error:', err);
+      showToast('Failed to load dashboard data', 'error');
+    }
+  }
+  
+  function renderSessions(sessions) {
+    const container = document.getElementById('sessions-container');
+    
+    if (!sessions || sessions.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-12 bg-surface-container-low rounded-xl">
+          <span class="material-symbols-outlined text-4xl text-slate-600">event_available</span>
+          <p class="text-slate-500 mt-2">No sessions scheduled for today.</p>
+          <a href="timetable.html" class="text-primary text-sm hover:underline mt-2 inline-block">+ Add a session</a>
+        </div>
+      `;
+      return;
+    }
+    
+    container.innerHTML = sessions.map(s => `
+      <div class="session-card bg-surface-container-low hover:bg-surface-container-lowest transition-all p-5 rounded-xl flex items-center gap-6 group cursor-pointer" onclick="window.location.href='focus.html'">
+        <div class="w-12 h-12 rounded-lg bg-[#282A30] flex flex-col items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+          <span class="text-xs font-bold leading-none">${s.start_time?.slice(0,5) || '--:--'}</span>
+        </div>
+        <div class="flex-1">
+          <h4 class="font-bold text-on-surface tracking-tight">${s.subject_name || 'Study Session'}</h4>
+          <p class="text-xs text-slate-500">${s.topic || 'No topic'} • ${s.duration_mins || 45} min</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">${s.status === 'completed' ? 'Done' : 'Pending'}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  // Initialize
+  initDashboard();
+  
+  // Fade up animations
+  document.querySelectorAll('.fade-up').forEach((el, i) => {
+    setTimeout(() => { el.style.opacity = '1'; }, 100 + i * 100);
+  });
+  
+  function toggleDark() { document.documentElement.classList.toggle('dark'); }
+</script>
 </body>
 </html>
