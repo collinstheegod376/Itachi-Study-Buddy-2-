@@ -23,6 +23,16 @@ async function requireAuth() {
       window.location.href = 'login.html';
       return null;
     }
+    
+    // Check onboarding status unless we're already on onboarding
+    if (!window.location.pathname.endsWith('onboarding.html') && !window.location.pathname.endsWith('auth-callback.html')) {
+      const profile = await window.ProfileAPI.get(user.id);
+      if (!profile || !profile.onboarding_complete) {
+        window.location.href = 'onboarding.html';
+        return null;
+      }
+    }
+    
     currentUser = user;
     return user;
   } catch (err) {

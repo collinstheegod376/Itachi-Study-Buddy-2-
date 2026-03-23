@@ -183,12 +183,18 @@ CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO profiles (id, notification_email)
-  VALUES (NEW.id, NEW.email);
+  VALUES (NEW.id, NEW.email)
+  ON CONFLICT (id) DO UPDATE SET notification_email = EXCLUDED.notification_email;
 
   INSERT INTO streaks (user_id)
-  VALUES (NEW.id);
+  VALUES (NEW.id)
+  ON CONFLICT (user_id) DO NOTHING;
 
   RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE LOG 'Error in handle_new_user trigger for user %: %', NEW.id, SQLERRM;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

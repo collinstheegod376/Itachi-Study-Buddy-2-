@@ -24,7 +24,16 @@ async function callSendEmail(payload: object) {
   });
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   const { trigger } = await req.json().catch(() => ({ trigger: 'morning' }));
 
   try {
@@ -35,7 +44,9 @@ serve(async (req) => {
       .eq('onboarding_complete', true);
 
     if (!profiles || profiles.length === 0) {
-      return new Response(JSON.stringify({ processed: 0 }));
+      return new Response(JSON.stringify({ processed: 0 }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
     }
 
     let emailsSent = 0;
@@ -198,12 +209,15 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ success: true, emails_sent: emailsSent, users_processed: profiles.length }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
 
   } catch (err) {
     console.error('streak-check error:', err);
-    return new Response(JSON.stringify({ error: String(err) }), { status: 500 });
+    return new Response(JSON.stringify({ error: String(err) }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
   }
 });
 

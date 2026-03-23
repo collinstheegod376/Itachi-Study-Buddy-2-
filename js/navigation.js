@@ -96,7 +96,16 @@ function closeMobileMenu() {
 
 function removeBottomNav() {
   // Remove all mobile bottom navigation bars
-  document.querySelectorAll('.md\\:hidden.fixed.bottom-0, nav.fixed.bottom-0, .bottom-nav').forEach(el => el.remove());
+  const allElements = document.querySelectorAll('nav, div');
+  allElements.forEach(el => {
+    const cls = el.className || '';
+    if (typeof cls === 'string' && cls.includes('fixed') && cls.includes('bottom-0')) {
+      if (cls.includes('md:hidden') || el.tagName === 'NAV') {
+        el.remove();
+      }
+    }
+  });
+  document.querySelectorAll('.bottom-nav').forEach(el => el.remove());
 }
 
 // Initialize on DOM ready

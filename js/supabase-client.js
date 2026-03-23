@@ -27,7 +27,7 @@ const Auth = {
   async signInWithGoogle() {
     const { error } = await window._supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/onboarding.html` },
+      options: { redirectTo: `${window.location.origin}/auth-callback.html` },
     });
     if (error) throw error;
   },
@@ -53,6 +53,16 @@ const Auth = {
       window.location.href = 'login.html';
       return null;
     }
+    
+    // Check onboarding if not currently on the onboarding page
+    if (!window.location.pathname.endsWith('onboarding.html') && !window.location.pathname.endsWith('auth-callback.html')) {
+      const profile = await ProfileAPI.get(user.id);
+      if (!profile || !profile.onboarding_complete) {
+        window.location.href = 'onboarding.html';
+        return null;
+      }
+    }
+    
     return user;
   },
 
@@ -345,6 +355,7 @@ const SchedulerAPI = {
       },
       body: JSON.stringify({ user_id: userId, weeks_ahead: weeksAhead }),
     });
+    if (!res.ok) throw new Error(`Scheduler API error: ${res.status}`);
     return res.json();
   },
 
@@ -358,6 +369,7 @@ const SchedulerAPI = {
       },
       body: JSON.stringify({ user_id: userId, action: 'preview', weeks_ahead: weeksAhead }),
     });
+    if (!res.ok) throw new Error(`Scheduler API error: ${res.status}`);
     return res.json();
   },
 
@@ -371,6 +383,7 @@ const SchedulerAPI = {
       },
       body: JSON.stringify({ user_id: userId, action: 'reschedule_skipped' }),
     });
+    if (!res.ok) throw new Error(`Scheduler API error: ${res.status}`);
     return res.json();
   },
 };
