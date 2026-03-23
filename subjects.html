@@ -261,6 +261,8 @@ async function addSubject() {
 initSubjects();
 
 </script>
-  <script src="js/supabase-client.js"></script>
+<!-- Add this BEFORE supabase-client.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
 </body>
 </html>

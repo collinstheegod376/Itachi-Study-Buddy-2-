@@ -592,35 +592,71 @@ initFocus();
 
 async function completeOnboarding() {
   const user = await Auth.getUser();
-  if (!user) return;
+  if (!user) {
+    showToast('User not found. Please login again.', 'error');
+    return;
+  }
+  
+  // Disable button to prevent double submission
+  const btn = document.querySelector('#step-5 button');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Creating your schedule...';
+  }
   
   try {
-    // Save profile data
-    await ProfileAPI.completeOnboarding(user.id, {
-      full_name: document.getElementById('student-name').value,
-      nickname: document.getElementById('student-nickname').value,
-      university: document.getElementById('university-input').value,
-      faculty: document.getElementById('faculty-select').value,
-      // ... preferences from step 4
-    });
+    // Get all form data from steps
+    const profileData = {
+      full_name: document.getElementById('student-name')?.value || '',
+      nickname: document.getElementById('student-nickname')?.value || '',
+      university: document.getElementById('university-input')?.value || '',
+      faculty: document.getElementById('faculty-select')?.value || '',
+      onboarding_complete: true,  // ✅ IMPORTANT: Set this to true
+    };
+    
+    // Get study preferences from step 4
+    const selectedTime = document.querySelector('[data-time-selected]')?.dataset.time || 'morning';
+    const selectedGoal = document.querySelector('[data-goal-selected]')?.dataset.goal || '3hr';
+    const selectedBreak = document.querySelector('[data-break-selected]')?.dataset.break || 'pomodoro';
+    
+    profileData.preferred_study_time = selectedTime;
+    profileData.daily_study_goal_hours = parseFloat(selectedGoal.replace('hr', ''));
+    profileData.break_style = selectedBreak;
+    
+    // Save profile with onboarding_complete = true
+    await ProfileAPI.completeOnboarding(user.id, profileData);
     
     // Save subjects
+    const selectedSubjects = [...document.querySelectorAll('.subject-chip.selected')].map(el => el.textContent);
     for (const subjectName of selectedSubjects) {
       await SubjectsAPI.create(user.id, {
         name: subjectName,
-        difficulty: 'medium', // from per-subject config
+        difficulty: 'medium',
       });
     }
     
     // Generate initial schedule
     await SchedulerAPI.generate(user.id);
     
-    window.location.href = 'dashboard.html';
+    showToast('Onboarding complete! Redirecting to dashboard...', 'success');
+    
+    // Small delay to show success message
+    setTimeout(() => {
+      window.location.href = 'dashboard.html';
+    }, 1000);
+    
   } catch (err) {
-    showToast(err.message, 'error');
+    console.error('Onboarding error:', err);
+    showToast(err.message || 'Failed to complete onboarding', 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Enter the Arena →';
+    }
   }
-} // ✅ Added closing brace for the function
-
-</script>  <script src="js/supabase-client.js"></script>
+}
+</script>  
+<!-- Add this BEFORE supabase-client.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
 </body>
 </html>

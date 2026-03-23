@@ -302,35 +302,66 @@
   }
   
   async function saveSettings() {
-    if (!currentUser) return;
-    
-    const updates = {
-      full_name: document.getElementById('input-fullname').value,
-      nickname: document.getElementById('input-nickname').value,
-      notification_email: document.getElementById('notify-email').value,
-      study_start_time: document.getElementById('start-time').value,
-      study_end_time: document.getElementById('end-time').value,
-      daily_study_goal_hours: parseFloat(document.getElementById('daily-goal').value),
-      focus_duration_mins: parseInt(document.getElementById('focus-duration').value),
-      short_break_mins: parseInt(document.getElementById('short-break').value),
-      long_break_mins: parseInt(document.getElementById('long-break').value),
-      sessions_before_long_break: parseInt(document.getElementById('sessions-before').value),
-      notify_daily_reminder: document.getElementById('notify-daily').checked,
-      notify_falling_behind: document.getElementById('notify-falling').checked,
-      notify_exam_countdown: document.getElementById('notify-exam').checked,
-      notify_streak_reminder: document.getElementById('notify-streak').checked,
-      quiet_hours_start: document.getElementById('quiet-start').value,
-      quiet_hours_end: document.getElementById('quiet-end').value
-    };
-    
-    try {
-      await ProfileAPI.update(currentUser.id, updates);
-      showToast('Settings saved successfully!', 'success');
-    } catch (err) {
-      showToast(err.message || 'Failed to save settings', 'error');
-    }
+  if (!currentUser) {
+    showToast('Please login first', 'error');
+    return;
   }
   
+  const btn = event?.target || document.querySelector('.btn-primary');
+  const originalText = btn?.textContent || 'Save Changes';
+  if (btn) {
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+  }
+  
+  try {
+    // Collect all form data
+    const updates = {
+      full_name: document.getElementById('input-fullname')?.value || '',
+      nickname: document.getElementById('input-nickname')?.value || '',
+      notification_email: document.getElementById('notify-email')?.value || currentUser.email,
+      study_start_time: document.getElementById('start-time')?.value || '08:00',
+      study_end_time: document.getElementById('end-time')?.value || '22:00',
+      daily_study_goal_hours: parseFloat(document.getElementById('daily-goal')?.value || 3),
+      focus_duration_mins: parseInt(document.getElementById('focus-duration')?.value || 25),
+      short_break_mins: parseInt(document.getElementById('short-break')?.value || 5),
+      long_break_mins: parseInt(document.getElementById('long-break')?.value || 20),
+      sessions_before_long_break: parseInt(document.getElementById('sessions-before')?.value || 4),
+      notify_daily_reminder: document.getElementById('notify-daily')?.checked || false,
+      notify_falling_behind: document.getElementById('notify-falling')?.checked || false,
+      notify_exam_countdown: document.getElementById('notify-exam')?.checked || false,
+      notify_streak_reminder: document.getElementById('notify-streak')?.checked || false,
+      quiet_hours_start: document.getElementById('quiet-start')?.value || '22:00',
+      quiet_hours_end: document.getElementById('quiet-end')?.value || '07:00',
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log('Saving updates:', updates);
+    
+    // Update profile using ProfileAPI
+    const result = await ProfileAPI.update(currentUser.id, updates);
+    console.log('Update result:', result);
+    
+    // Update local display
+    document.getElementById('profile-name').textContent = updates.full_name || currentUser.email?.split('@')[0] || 'Student';
+    const initials = (updates.full_name || '?').charAt(0).toUpperCase();
+    document.getElementById('avatar-initials').textContent = initials;
+    
+    showToast('Settings saved successfully!', 'success');
+    
+    // Refresh profile data
+    profileData = await ProfileAPI.get(currentUser.id);
+    
+  } catch (err) {
+    console.error('Save error:', err);
+    showToast(err.message || 'Failed to save settings', 'error');
+  } finally {
+    if (btn) {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  }
+}
   function showSection(name) {
     document.querySelectorAll('.settings-section').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.settings-nav-item').forEach(n => {
@@ -398,5 +429,8 @@
   
   initSettings();
 </script>
+<!-- Add this BEFORE supabase-client.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
 </body>
 </html>

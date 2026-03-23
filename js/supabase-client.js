@@ -74,18 +74,27 @@ const ProfileAPI = {
       .select('*')
       .eq('id', userId)
       .single();
-    if (error) throw error;
-    return data;
+    if (error && error.code !== 'PGRST116') throw error;
+    return data || {};
   },
 
   async update(userId, updates) {
+    // Remove any undefined values
+    Object.keys(updates).forEach(key => {
+      if (updates[key] === undefined) delete updates[key];
+    });
+    
     const { data, error } = await window._supabase
       .from('profiles')
       .update(updates)
       .eq('id', userId)
       .select()
       .single();
-    if (error) throw error;
+      
+    if (error) {
+      console.error('Update error:', error);
+      throw new Error(error.message);
+    }
     return data;
   },
 
