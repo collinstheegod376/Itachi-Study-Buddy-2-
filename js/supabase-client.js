@@ -6,8 +6,8 @@
 // ============================================================
 // CONFIG — replace with your actual Supabase project values
 // ============================================================
-const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+const SUPABASE_URL = 'https://cfqdyxfyxnbqfqptpyox.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmcWR5eGZ5eG5icWZxcHRweW94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjE4ODUsImV4cCI6MjA4OTc5Nzg4NX0.ZySccEvuJQ4nMrAwzvoDH8L3f2iW2mxHM8nR01FNmTs';
 
 // Load Supabase SDK dynamically if not already loaded
 (function loadSupabase() {
