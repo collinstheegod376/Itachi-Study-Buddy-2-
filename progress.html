@@ -64,26 +64,26 @@
 
   <main class="px-6 md:px-10 py-8 max-w-5xl mx-auto pb-24 md:pb-8 space-y-8">
 
-    <!-- Overview stats -->
+    <!-- Overview stats - Dynamic -->
     <div class="fade-up grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-[#191b22] rounded-xl p-5 border border-white/5">
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Total Hours</div>
-        <div class="text-3xl font-black text-on-surface count-up">47.5h</div>
-        <div class="text-[11px] text-emerald-400 mt-1 font-medium">↑ 12% this week</div>
+        <div class="text-3xl font-black text-on-surface count-up" id="total-hours">--</div>
+        <div class="text-[11px] text-emerald-400 mt-1 font-medium" id="weekly-change">--</div>
       </div>
       <div class="bg-[#191b22] rounded-xl p-5 border border-white/5">
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Streak</div>
-        <div class="text-3xl font-black text-tertiary count-up">12 🔥</div>
-        <div class="text-[11px] text-slate-500 mt-1 font-medium">Personal best: 18</div>
+        <div class="text-3xl font-black text-tertiary count-up" id="streak-value">-- 🔥</div>
+        <div class="text-[11px] text-slate-500 mt-1 font-medium" id="best-streak">Personal best: --</div>
       </div>
       <div class="bg-[#191b22] rounded-xl p-5 border border-white/5">
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Sessions</div>
-        <div class="text-3xl font-black text-primary count-up">89</div>
-        <div class="text-[11px] text-slate-500 mt-1 font-medium">This semester</div>
+        <div class="text-3xl font-black text-primary count-up" id="total-sessions">--</div>
+        <div class="text-[11px] text-slate-500 mt-1 font-medium" id="sessions-period">This semester</div>
       </div>
       <div class="bg-[#191b22] rounded-xl p-5 border border-white/5">
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Completion</div>
-        <div class="text-3xl font-black text-on-surface count-up">84%</div>
+        <div class="text-3xl font-black text-on-surface count-up" id="completion-rate">--%</div>
         <div class="text-[11px] text-emerald-400 mt-1 font-medium">Sessions completed</div>
       </div>
     </div>
@@ -103,92 +103,27 @@
           <div class="text-2xl font-black text-on-surface">This Week</div>
         </div>
         <div class="text-right">
-          <div class="text-2xl font-black text-primary">14.5h</div>
-          <div class="text-[11px] text-slate-500">Goal: 21h</div>
+          <div class="text-2xl font-black text-primary" id="week-hours">--h</div>
+          <div class="text-[11px] text-slate-500" id="week-goal">Goal: --h</div>
         </div>
       </div>
       <div class="h-48"><canvas id="weeklyChart"></canvas></div>
     </div>
 
-    <!-- Subject Progress -->
+    <!-- Subject Progress - Dynamic -->
     <div class="fade-up" style="animation-delay:0.15s;opacity:0">
       <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-5">Syllabus Coverage per Subject</div>
-      <div class="space-y-5">
-        <div class="bg-[#191b22] rounded-xl p-5 border border-white/5">
-          <div class="flex justify-between items-center mb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-3 h-3 rounded-full bg-error"></div>
-              <span class="font-bold text-sm">Quantum Mechanics</span>
-              <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-error/10 text-red-400 border border-red-500/20 uppercase tracking-wider">Hard</span>
-            </div>
-            <span class="text-sm font-black text-on-surface">42%</span>
-          </div>
-          <div class="w-full bg-[#111319] rounded-full h-2 overflow-hidden">
-            <div class="grow-bar h-full rounded-full bg-gradient-to-r from-[#c4c0ff] to-[#8781ff]" style="--w:42%;width:0"></div>
-          </div>
-          <div class="flex justify-between mt-2">
-            <span class="text-[10px] text-slate-600">21 / 50 topics</span>
-            <span class="text-[10px] text-red-400 font-bold">Exam in 3 days ⚠️</span>
-          </div>
-        </div>
-        <div class="bg-[#191b22] rounded-xl p-5 border border-white/5">
-          <div class="flex justify-between items-center mb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-3 h-3 rounded-full bg-primary"></div>
-              <span class="font-bold text-sm">Linear Algebra</span>
-              <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wider">Medium</span>
-            </div>
-            <span class="text-sm font-black text-on-surface">78%</span>
-          </div>
-          <div class="w-full bg-[#111319] rounded-full h-2 overflow-hidden">
-            <div class="grow-bar h-full rounded-full bg-gradient-to-r from-[#c4c0ff] to-[#8781ff]" style="--w:78%;width:0"></div>
-          </div>
-          <div class="flex justify-between mt-2">
-            <span class="text-[10px] text-slate-600">39 / 50 topics</span>
-            <span class="text-[10px] text-slate-500">Exam in 12 days</span>
-          </div>
-        </div>
-        <div class="bg-[#191b22] rounded-xl p-5 border border-white/5">
-          <div class="flex justify-between items-center mb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
-              <span class="font-bold text-sm">Philosophy of Science</span>
-              <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">Easy</span>
-            </div>
-            <span class="text-sm font-black text-on-surface">15%</span>
-          </div>
-          <div class="w-full bg-[#111319] rounded-full h-2 overflow-hidden">
-            <div class="grow-bar h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600" style="--w:15%;width:0"></div>
-          </div>
-          <div class="flex justify-between mt-2">
-            <span class="text-[10px] text-slate-600">8 / 50 topics</span>
-            <span class="text-[10px] text-slate-500">Exam in 32 days</span>
-          </div>
-        </div>
+      <div id="subject-progress-container" class="space-y-5">
+        <div class="text-center py-12 text-slate-500">Loading your subjects...</div>
       </div>
     </div>
 
-    <!-- Hours per subject bar chart -->
+    <!-- Hours per subject - Dynamic -->
     <div class="fade-up bg-[#191b22] rounded-xl p-6 border border-white/5" style="animation-delay:0.2s;opacity:0">
       <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Hours Studied</div>
       <div class="text-xl font-black text-on-surface mb-6">By Subject</div>
-      <div class="space-y-4">
-        <div>
-          <div class="flex justify-between text-sm mb-1.5"><span class="font-semibold">Quantum Mechanics</span><span class="font-black text-primary">18.5h</span></div>
-          <div class="h-2.5 bg-[#111319] rounded-full overflow-hidden"><div class="grow-bar h-full rounded-full bg-gradient-to-r from-[#c4c0ff] to-[#8781ff]" style="--w:88%;width:0"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between text-sm mb-1.5"><span class="font-semibold">Linear Algebra</span><span class="font-black text-primary">14.0h</span></div>
-          <div class="h-2.5 bg-[#111319] rounded-full overflow-hidden"><div class="grow-bar h-full rounded-full bg-gradient-to-r from-[#c4c0ff] to-[#8781ff]" style="--w:67%;width:0"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between text-sm mb-1.5"><span class="font-semibold">Philosophy of Science</span><span class="font-black text-primary">8.5h</span></div>
-          <div class="h-2.5 bg-[#111319] rounded-full overflow-hidden"><div class="grow-bar h-full rounded-full bg-gradient-to-r from-[#c4c0ff] to-[#8781ff]" style="--w:40%;width:0"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between text-sm mb-1.5"><span class="font-semibold">Free Study</span><span class="font-black text-primary">6.5h</span></div>
-          <div class="h-2.5 bg-[#111319] rounded-full overflow-hidden"><div class="grow-bar h-full rounded-full bg-gradient-to-r from-slate-400 to-slate-600" style="--w:31%;width:0"></div></div>
-        </div>
+      <div id="hours-container" class="space-y-4">
+        <div class="text-center py-12 text-slate-500">Loading study hours...</div>
       </div>
     </div>
 
@@ -232,75 +167,262 @@
 </nav>
 
 <script>
-  // Animate fade-up items
-  document.querySelectorAll('.fade-up').forEach((el,i) => {
-    el.style.opacity = '0';
-    setTimeout(() => { el.style.animation = `fadeUp 0.5s ease ${i*0.1}s forwards`; el.style.opacity = ''; }, 50);
-  });
+  let currentUser = null;
+  let weeklyChart = null;
 
-  // Animate grow bars
-  setTimeout(() => {
-    document.querySelectorAll('.grow-bar').forEach(bar => {
-      bar.style.width = bar.style.getPropertyValue('--w') || getComputedStyle(bar).getPropertyValue('--w');
-    });
-  }, 300);
-
-  // Weekly chart
-  const ctx = document.getElementById('weeklyChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-      datasets: [{
-        label: 'Hours',
-        data: [2.5, 3, 1.5, 2, 2.5, 1.5, 1.5],
-        backgroundColor: (ctx) => {
-          const g = ctx.chart.ctx.createLinearGradient(0,0,0,200);
-          g.addColorStop(0,'rgba(196,192,255,0.8)');
-          g.addColorStop(1,'rgba(135,129,255,0.2)');
-          return g;
-        },
-        borderRadius: 6,
-        borderSkipped: false
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor:'#191b22', titleColor:'#e2e2eb', bodyColor:'#c4c0ff', borderColor:'rgba(255,255,255,0.1)', borderWidth:1 } },
-      scales: {
-        x: { grid: { display: false }, ticks: { color:'#64748b', font:{size:11,weight:'bold'} } },
-        y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b', font:{size:11} }, border:{display:false} }
-      }
+  async function initProgress() {
+    // Wait for Auth to be ready
+    if (!window.Auth) {
+      setTimeout(initProgress, 100);
+      return;
     }
-  });
-
-  // Heatmap
+    
+    currentUser = await Auth.requireAuth();
+    if (!currentUser) return;
+    
+    try {
+      const summary = await ProgressAPI.getSummary(currentUser.id);
+      const streak = await StreakAPI.get(currentUser.id);
+      const weekStats = await SessionsAPI.getStats(currentUser.id);
+      const weeklyData = await getWeeklyData();
+      
+      // Update stats
+      const totalHours = Math.round(weekStats.total_mins / 60) || 0;
+      document.getElementById('total-hours').textContent = totalHours + 'h';
+      document.getElementById('streak-value').textContent = (streak.current_streak || 0) + ' 🔥';
+      document.getElementById('best-streak').textContent = `Personal best: ${streak.longest_streak || 0}`;
+      document.getElementById('total-sessions').textContent = weekStats.completed_sessions || 0;
+      
+      const completionRate = weekStats.completed_sessions / Math.max(weekStats.completed_sessions + weekStats.skipped_sessions, 1) * 100;
+      document.getElementById('completion-rate').textContent = Math.round(completionRate) + '%';
+      
+      // Update weekly chart
+      updateWeeklyChart(weeklyData);
+      
+      // Update week hours
+      const weekTotal = weeklyData.reduce((sum, d) => sum + d, 0);
+      document.getElementById('week-hours').textContent = weekTotal + 'h';
+      document.getElementById('week-goal').textContent = `Goal: ${summary.streak?.daily_goal || 21}h`;
+      
+      // Render subjects
+      renderSubjects(summary.subjects);
+      renderHours(summary.subjects);
+      
+      // Build heatmap
+      buildHeatmap();
+      
+    } catch (err) {
+      console.error('Progress error:', err);
+      showToast('Failed to load progress data', 'error');
+    }
+  }
+  
+  async function getWeeklyData() {
+    // Get last 7 days of study data
+    const today = new Date();
+    const weekData = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const { data } = await window._supabase
+        .from('study_sessions')
+        .select('actual_duration_mins')
+        .eq('user_id', currentUser.id)
+        .eq('status', 'completed')
+        .eq('scheduled_date', dateStr);
+      
+      const hours = (data || []).reduce((sum, s) => sum + (s.actual_duration_mins || 0), 0) / 60;
+      weekData.push(Math.round(hours * 10) / 10);
+    }
+    
+    return weekData;
+  }
+  
+  function updateWeeklyChart(data) {
+    const ctx = document.getElementById('weeklyChart').getContext('2d');
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    if (weeklyChart) {
+      weeklyChart.data.datasets[0].data = data;
+      weeklyChart.update();
+    } else {
+      weeklyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Hours',
+            data: data,
+            backgroundColor: (ctx) => {
+              const g = ctx.chart.ctx.createLinearGradient(0,0,0,200);
+              g.addColorStop(0,'rgba(196,192,255,0.8)');
+              g.addColorStop(1,'rgba(135,129,255,0.2)');
+              return g;
+            },
+            borderRadius: 6,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { backgroundColor:'#191b22', titleColor:'#e2e2eb', bodyColor:'#c4c0ff', borderColor:'rgba(255,255,255,0.1)', borderWidth:1 } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color:'#64748b', font:{size:11,weight:'bold'} } },
+            y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b', font:{size:11} }, border:{display:false} }
+          }
+        }
+      });
+    }
+  }
+  
+  function renderSubjects(subjects) {
+    const container = document.getElementById('subject-progress-container');
+    
+    if (!subjects || subjects.length === 0) {
+      container.innerHTML = '<div class="text-center py-12 text-slate-500">No subjects added yet. Add subjects to see progress.</div>';
+      return;
+    }
+    
+    container.innerHTML = subjects.map(sub => `
+      <div class="bg-[#191b22] rounded-xl p-5 border border-white/5">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full" style="background: ${sub.color || '#c4c0ff'}"></div>
+            <span class="font-bold text-sm">${sub.name}</span>
+            <span class="px-2 py-0.5 rounded text-[9px] font-bold ${getDifficultyClass(sub.difficulty)}">${sub.difficulty || 'medium'}</span>
+          </div>
+          <span class="text-sm font-black text-on-surface">${sub.coverage_pct || 0}%</span>
+        </div>
+        <div class="w-full bg-[#111319] rounded-full h-2 overflow-hidden">
+          <div class="h-full rounded-full bg-gradient-to-r from-primary to-primary-container" style="width: ${sub.coverage_pct || 0}%; transition: width 0.5s ease"></div>
+        </div>
+        <div class="flex justify-between mt-2">
+          <span class="text-[10px] text-slate-600">${sub.covered_topics || 0} / ${sub.total_topics || 0} topics</span>
+          <span class="text-[10px] ${sub.days_remaining <= 3 ? 'text-red-400 font-bold' : 'text-slate-500'}">${sub.days_remaining ? `${sub.days_remaining} days to exam` : 'No exam date'}</span>
+        </div>
+      </div>
+    `).join('');
+    
+    // Animate bars
+    setTimeout(() => {
+      document.querySelectorAll('#subject-progress-container .h-full').forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => bar.style.width = width, 50);
+      });
+    }, 100);
+  }
+  
+  function renderHours(subjects) {
+    const container = document.getElementById('hours-container');
+    
+    if (!subjects || subjects.length === 0) {
+      container.innerHTML = '<div class="text-center py-12 text-slate-500">No study hours recorded yet.</div>';
+      return;
+    }
+    
+    // Get actual hours from focus_sessions
+    Promise.all(subjects.map(async (sub) => {
+      const { data } = await window._supabase
+        .from('focus_sessions')
+        .select('actual_duration_mins')
+        .eq('user_id', currentUser.id)
+        .eq('subject_id', sub.id)
+        .eq('completed', true);
+      
+      const hours = (data || []).reduce((sum, s) => sum + (s.actual_duration_mins || 0), 0) / 60;
+      return { ...sub, hours: Math.round(hours * 10) / 10 };
+    })).then(subjectsWithHours => {
+      const maxHours = Math.max(...subjectsWithHours.map(s => s.hours), 1);
+      
+      container.innerHTML = subjectsWithHours.map(sub => {
+        const percent = (sub.hours / maxHours) * 100;
+        return `
+          <div>
+            <div class="flex justify-between text-sm mb-1.5">
+              <span class="font-semibold">${sub.name}</span>
+              <span class="font-black text-primary">${sub.hours}h</span>
+            </div>
+            <div class="h-2.5 bg-[#111319] rounded-full overflow-hidden">
+              <div class="h-full rounded-full bg-gradient-to-r from-primary to-primary-container" style="width: 0%; transition: width 0.5s ease" data-width="${percent}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // Animate bars
+      setTimeout(() => {
+        document.querySelectorAll('#hours-container [data-width]').forEach(bar => {
+          const width = bar.getAttribute('data-width');
+          bar.style.width = width;
+        });
+      }, 150);
+    });
+  }
+  
+  function getDifficultyClass(difficulty) {
+    switch(difficulty?.toLowerCase()) {
+      case 'easy': return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+      case 'hard': return 'bg-red-500/10 text-red-400 border border-red-500/20';
+      default: return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+    }
+  }
+  
   function buildHeatmap() {
     const container = document.getElementById('heatmap');
     const weeks = 16;
+    container.innerHTML = '';
+    
     for (let w = 0; w < weeks; w++) {
       const col = document.createElement('div');
       col.className = 'flex flex-col gap-1.5';
       for (let d = 0; d < 7; d++) {
         const cell = document.createElement('div');
-        const intensity = Math.random();
-        const alpha = intensity < 0.3 ? 0.04 : intensity < 0.5 ? 0.2 : intensity < 0.7 ? 0.45 : intensity < 0.9 ? 0.7 : 1;
         cell.className = 'heatmap-cell';
-        cell.style.background = `rgba(196,192,255,${alpha})`;
-        cell.title = `${Math.floor(intensity * 4)}h studied`;
+        cell.style.background = 'rgba(196,192,255,0.05)';
         col.appendChild(cell);
       }
       container.appendChild(col);
     }
   }
-  buildHeatmap();
-
+  
   function switchTab(tab, btn) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     // Could update chart data here
   }
+  
+  function showToast(message, type = 'success') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    
+    const icons = { success: 'check_circle', error: 'error', info: 'info' };
+    const colors = { success: '#c4c0ff', error: '#ffb4ab', info: '#ffb785' };
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#282a30;border:1px solid rgba(255,255,255,0.1);border-radius:100px;padding:10px 20px;font-size:13px;font-weight:700;color:#e2e2eb;z-index:9999;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,0.4);';
+    toast.innerHTML = `
+      <span class="material-symbols-outlined" style="color:${colors[type]};font-size:18px;font-variation-settings:'FILL' 1">${icons[type]}</span>
+      ${message}
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.remove(), 3000);
+  }
+  
+  // Initialize
+  initProgress();
+  
+  // Fade up animations
+  document.querySelectorAll('.fade-up').forEach((el,i) => {
+    el.style.opacity = '0';
+    setTimeout(() => { el.style.opacity = '1'; }, 100 + i * 80);
+  });
 </script>
-  <script src="js/supabase-client.js"></script>
+<script src="js/supabase-client.js"></script>
 </body>
 </html>

@@ -184,33 +184,10 @@
   let currentWeekOffset = 0;
   let selectedDayIndex = new Date().getDay();
   let selectedColor = '#c4c0ff';
-
-  // Session data per day-of-week
-  const sessions = {
-    0: [], // Sun
-    1: [
-      { id:1, subject:'Linear Algebra', topic:'Eigenvalues & Eigenvectors', time:'09:00', dur:'90 min', color:'#c4c0ff', done:false },
-      { id:2, subject:'Quantum Mechanics', topic:'Wave-Particle Duality', time:'14:00', dur:'60 min', color:'#f87171', done:false },
-    ],
-    2: [
-      { id:3, subject:'Philosophy of Science', topic:'Popper & Falsificationism', time:'10:00', dur:'45 min', color:'#34d399', done:false },
-      { id:4, subject:'Linear Algebra', topic:'Matrix Decomposition', time:'16:00', dur:'90 min', color:'#c4c0ff', done:false },
-    ],
-    3: [ // Today's sessions (Wed)
-      { id:5, subject:'Computer Architecture', topic:'Pipelining & Hazards', time:'08:00', dur:'45 min', color:'#60a5fa', done:true },
-      { id:6, subject:'Linear Algebra', topic:'Eigenvalues & Eigenvectors', time:'10:00', dur:'90 min', color:'#c4c0ff', done:false },
-      { id:7, subject:'Quantum Mechanics', topic:'Schrödinger Equation', time:'14:30', dur:'60 min', color:'#f87171', done:false },
-      { id:8, topic:'☕ Break', subject:'Rest', time:'13:30', dur:'30 min', color:'#464555', done:false, isBreak:true },
-    ],
-    4: [
-      { id:9, subject:'Quantum Mechanics', topic:'Uncertainty Principle', time:'09:00', dur:'90 min', color:'#f87171', done:false },
-    ],
-    5: [
-      { id:10, subject:'Philosophy of Science', topic:'Thomas Kuhn & Paradigms', time:'11:00', dur:'60 min', color:'#34d399', done:false },
-      { id:11, subject:'Linear Algebra', topic:'Inner Product Spaces', time:'15:00', dur:'45 min', color:'#c4c0ff', done:false },
-    ],
-    6: [],
-  };
+// Empty sessions - will be populated from database
+let sessions = {
+  0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []
+};
 
   let nextId = 20;
 

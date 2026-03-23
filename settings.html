@@ -2,7 +2,7 @@
 <html class="dark" lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
 <title>Itachi Study Buddy — Settings</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
@@ -23,26 +23,28 @@
   .fade-up{animation:fadeUp 0.4s ease forwards;}
   .nav-link{transition:all 0.2s;}
   .nav-link:hover{background:rgba(255,255,255,0.05);}
-  .settings-section{opacity:0;}
-  .toggle-track{transition:background 0.2s;}
-  input[type=checkbox]:checked + .toggle-track{background:rgba(135,129,255,0.8);}
-  .settings-nav-item{transition:all 0.2s;cursor:pointer;}
-  .settings-nav-item.active{background:rgba(196,192,255,0.08);color:#c4c0ff;border-left:2px solid #c4c0ff;}
+  .settings-nav-item{transition:all 0.2s;cursor:pointer;border-left:2px solid transparent;}
+  .settings-nav-item.active{background:rgba(196,192,255,0.08);color:#c4c0ff;border-left-color:#c4c0ff;}
   .settings-nav-item:not(.active):hover{background:rgba(255,255,255,0.03);}
   .color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:all 0.15s;border:2px solid transparent;}
   .color-swatch.selected{transform:scale(1.2);border-color:white;}
   .color-swatch:hover:not(.selected){transform:scale(1.1);}
   input[type=range]{-webkit-appearance:none;height:4px;background:rgba(255,255,255,0.1);border-radius:4px;outline:none;}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#c4c0ff,#8781ff);cursor:pointer;transition:transform 0.1s;}
-  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
-  .danger-btn{transition:all 0.2s;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#c4c0ff,#8781ff);cursor:pointer;}
   .danger-btn:hover{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.4);color:#ef4444;}
   input:focus,select:focus{outline:none;border-color:#c4c0ff!important;box-shadow:0 0 0 2px rgba(196,192,255,0.12);}
+  @media (max-width: 768px) {
+    .settings-sidebar{position:fixed;bottom:0;left:0;right:0;top:auto;background:#191b22;border-top:1px solid rgba(255,255,255,0.1);padding:12px 16px;overflow-x:auto;white-space:nowrap;z-index:60;}
+    .settings-sidebar .space-y-1{display:flex;gap:8px;flex-direction:row;}
+    .settings-nav-item{display:inline-flex;white-space:nowrap;border-left:none;border-bottom:2px solid transparent;padding:8px 16px;}
+    .settings-nav-item.active{border-left:none;border-bottom-color:#c4c0ff;}
+    .settings-content{padding-bottom:100px;}
+  }
 </style>
 </head>
 <body class="bg-[#111319] text-[#e2e2eb] min-h-screen">
 
-<!-- Sidebar -->
+<!-- Sidebar Desktop -->
 <aside class="hidden md:flex flex-col p-6 gap-4 bg-[#191B22] h-full w-72 fixed left-0 top-0 z-[60] shadow-2xl">
   <div class="mb-8"><span class="text-xs font-bold text-slate-500 tracking-[0.05em] uppercase">MONASTIC WORKSPACE</span></div>
   <nav class="flex flex-col gap-1">
@@ -55,68 +57,63 @@
   </nav>
 </aside>
 
-<div class="md:ml-72 min-h-screen">
-  <header class="flex justify-between items-center px-6 h-16 bg-[#111319] border-b border-white/5 sticky top-0 z-50">
-    <div class="flex items-center gap-4">
+<div class="md:ml-72 min-h-screen flex flex-col">
+  <header class="flex justify-between items-center px-4 md:px-6 h-16 bg-[#111319] border-b border-white/5 sticky top-0 z-50">
+    <div class="flex items-center gap-3">
       <a href="dashboard.html" class="md:hidden text-[#C4C0FF]"><span class="material-symbols-outlined">arrow_back</span></a>
-      <h1 class="font-bold text-lg uppercase text-[#C4C0FF] tracking-tight">Settings</h1>
+      <h1 class="font-bold text-base md:text-lg uppercase text-[#C4C0FF] tracking-tight">Settings</h1>
     </div>
-    <button onclick="saveSettings()" class="text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-primary-container text-[#111319] hover:opacity-90 transition-all active:scale-95">
+    <button onclick="saveSettings()" class="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-3 md:px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-primary-container text-[#111319] hover:opacity-90 transition-all active:scale-95">
       Save Changes
     </button>
   </header>
 
-  <div class="flex md:flex-row flex-col max-w-6xl mx-auto">
+  <div class="flex flex-col md:flex-row flex-1">
 
-    <!-- Settings nav sidebar -->
-    <div class="md:w-56 md:min-h-screen border-r border-white/5 py-6 px-3 sticky top-16 self-start">
-      <div class="space-y-1">
+    <!-- Settings nav - Mobile friendly horizontal scroll -->
+    <div class="settings-sidebar md:w-56 md:min-h-screen md:border-r border-white/5 py-3 md:py-6 px-3 md:sticky md:top-16 bg-[#111319] md:bg-transparent z-40">
+      <div class="space-y-1 flex md:flex-col gap-2 overflow-x-auto pb-2 md:pb-0">
         <div onclick="showSection('profile')" class="settings-nav-item active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium"><span class="material-symbols-outlined text-[18px]">person</span>Profile</div>
         <div onclick="showSection('appearance')" class="settings-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400"><span class="material-symbols-outlined text-[18px]">palette</span>Appearance</div>
         <div onclick="showSection('schedule')" class="settings-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400"><span class="material-symbols-outlined text-[18px]">schedule</span>Schedule</div>
         <div onclick="showSection('focus')" class="settings-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400"><span class="material-symbols-outlined text-[18px]">timer</span>Focus & Timer</div>
         <div onclick="showSection('notifications')" class="settings-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400"><span class="material-symbols-outlined text-[18px]">notifications</span>Notifications</div>
         <div onclick="showSection('privacy')" class="settings-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400"><span class="material-symbols-outlined text-[18px]">lock</span>Privacy</div>
-        <div onclick="showSection('integrations')" class="settings-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400"><span class="material-symbols-outlined text-[18px]">extension</span>Integrations</div>
-        <div onclick="showSection('academic')" class="settings-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400"><span class="material-symbols-outlined text-[18px]">school</span>Academic</div>
-        <div onclick="showSection('data')" class="settings-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400"><span class="material-symbols-outlined text-[18px]">database</span>Data & Export</div>
         <div onclick="showSection('danger')" class="settings-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400"><span class="material-symbols-outlined text-[18px]">warning</span>Danger Zone</div>
       </div>
     </div>
 
     <!-- Settings content -->
-    <div class="flex-1 py-8 px-6 md:px-10 space-y-6 pb-24 md:pb-8">
+    <div class="settings-content flex-1 py-6 px-4 md:px-10 space-y-6 pb-28 md:pb-8">
 
       <!-- PROFILE -->
-      <div id="section-profile" class="settings-section space-y-6">
+      <div id="section-profile" class="space-y-6">
         <div>
           <h2 class="text-xl font-black tracking-tight mb-1">Profile</h2>
           <p class="text-slate-500 text-sm">Your personal information and academic details.</p>
         </div>
-        <!-- Avatar -->
-        <div class="bg-[#191b22] rounded-xl p-6 border border-white/5 space-y-6">
-          <div class="flex items-center gap-6">
+        <div class="bg-[#191b22] rounded-xl p-5 md:p-6 border border-white/5 space-y-5">
+          <div class="flex items-center gap-4 md:gap-6">
             <div class="relative">
-              <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-2xl font-black text-[#111319]">CE</div>
-              <div class="absolute -bottom-1 -right-1 w-7 h-7 bg-[#282a30] rounded-full border border-white/10 flex items-center justify-center cursor-pointer hover:bg-[#33343b] transition-colors">
-                <span class="material-symbols-outlined text-[14px]">edit</span>
+              <div id="avatar-initials" class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-xl md:text-2xl font-black text-[#111319]">?</div>
+              <div class="absolute -bottom-1 -right-1 w-6 h-6 md:w-7 md:h-7 bg-[#282a30] rounded-full border border-white/10 flex items-center justify-center cursor-pointer hover:bg-[#33343b] transition-colors">
+                <span class="material-symbols-outlined text-[12px] md:text-[14px]">edit</span>
               </div>
             </div>
             <div>
-              <div class="font-bold text-on-surface">Chukwuemeka Obi</div>
-              <div class="text-sm text-slate-500">chukwuemeka@uniport.edu.ng</div>
-              <button class="text-[11px] text-primary font-bold mt-1 hover:underline">Change photo</button>
+              <div id="profile-name" class="font-bold text-on-surface text-base md:text-lg">Loading...</div>
+              <div id="profile-email" class="text-xs md:text-sm text-slate-500">loading@email.com</div>
+              <button class="text-[10px] md:text-[11px] text-primary font-bold mt-1 hover:underline">Change photo</button>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Full Name</label><input type="text" value="Chukwuemeka Obi" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Nickname</label><input type="text" value="Emeka" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Email</label><input type="email" value="chukwuemeka@uniport.edu.ng" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Phone (for SMS alerts)</label><input type="tel" placeholder="+234 800 000 0000" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-slate-600 transition-all"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Full Name</label><input id="input-fullname" type="text" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Nickname</label><input id="input-nickname" type="text" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Email</label><input id="input-email" type="email" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Phone (for SMS alerts)</label><input id="input-phone" type="tel" placeholder="+234 800 000 0000" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-slate-600 transition-all"/></div>
           </div>
         </div>
-        <!-- Password -->
-        <div class="bg-[#191b22] rounded-xl p-6 border border-white/5 space-y-4">
+        <div class="bg-[#191b22] rounded-xl p-5 md:p-6 border border-white/5 space-y-4">
           <h3 class="font-bold text-sm uppercase tracking-widest text-slate-400">Change Password</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Current Password</label><input type="password" placeholder="••••••••" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-slate-600 transition-all"/></div>
@@ -126,31 +123,17 @@
       </div>
 
       <!-- APPEARANCE -->
-      <div id="section-appearance" class="settings-section hidden space-y-6">
+      <div id="section-appearance" class="hidden space-y-6">
         <div><h2 class="text-xl font-black tracking-tight mb-1">Appearance</h2><p class="text-slate-500 text-sm">Customise how Itachi looks on your device.</p></div>
-        <div class="bg-[#191b22] rounded-xl p-6 border border-white/5 space-y-6">
-          <!-- Theme -->
+        <div class="bg-[#191b22] rounded-xl p-5 md:p-6 border border-white/5 space-y-6">
           <div>
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Color Theme</div>
             <div class="grid grid-cols-3 gap-3">
-              <button onclick="setTheme(this,'dark')" class="theme-btn p-4 rounded-xl bg-[#111319] border-2 border-primary text-left group">
-                <div class="w-full h-8 bg-[#191b22] rounded-lg mb-3"></div>
-                <div class="text-xs font-bold">Dark</div>
-                <div class="text-[10px] text-slate-500">Default</div>
-              </button>
-              <button onclick="setTheme(this,'light')" class="theme-btn p-4 rounded-xl bg-[#191b22] border-2 border-white/10 text-left group">
-                <div class="w-full h-8 bg-white rounded-lg mb-3"></div>
-                <div class="text-xs font-bold">Light</div>
-                <div class="text-[10px] text-slate-500">Bright mode</div>
-              </button>
-              <button onclick="setTheme(this,'system')" class="theme-btn p-4 rounded-xl bg-[#191b22] border-2 border-white/10 text-left group">
-                <div class="w-full h-8 bg-gradient-to-r from-[#111319] to-white rounded-lg mb-3"></div>
-                <div class="text-xs font-bold">System</div>
-                <div class="text-[10px] text-slate-500">Auto switch</div>
-              </button>
+              <button onclick="setTheme(this,'dark')" class="theme-btn p-4 rounded-xl bg-[#111319] border-2 border-primary text-left"><div class="w-full h-8 bg-[#191b22] rounded-lg mb-3"></div><div class="text-xs font-bold">Dark</div><div class="text-[10px] text-slate-500">Default</div></button>
+              <button onclick="setTheme(this,'light')" class="theme-btn p-4 rounded-xl bg-[#111319] border-2 border-white/10 text-left"><div class="w-full h-8 bg-white rounded-lg mb-3"></div><div class="text-xs font-bold">Light</div><div class="text-[10px] text-slate-500">Bright mode</div></button>
+              <button onclick="setTheme(this,'system')" class="theme-btn p-4 rounded-xl bg-[#111319] border-2 border-white/10 text-left"><div class="w-full h-8 bg-gradient-to-r from-[#111319] to-white rounded-lg mb-3"></div><div class="text-xs font-bold">System</div><div class="text-[10px] text-slate-500">Auto switch</div></button>
             </div>
           </div>
-          <!-- Accent color -->
           <div>
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Accent Color</div>
             <div class="flex gap-3 flex-wrap">
@@ -159,182 +142,96 @@
               <div onclick="setAccent(this,'#34d399')" class="color-swatch" style="background:#34d399"></div>
               <div onclick="setAccent(this,'#f472b6')" class="color-swatch" style="background:#f472b6"></div>
               <div onclick="setAccent(this,'#fb923c')" class="color-swatch" style="background:#fb923c"></div>
-              <div onclick="setAccent(this,'#facc15')" class="color-swatch" style="background:#facc15"></div>
-              <div onclick="setAccent(this,'#f87171')" class="color-swatch" style="background:#f87171"></div>
-              <div onclick="setAccent(this,'#a3e635')" class="color-swatch" style="background:#a3e635"></div>
             </div>
           </div>
-          <!-- Font size -->
           <div>
             <div class="flex justify-between mb-3"><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Font Size</div><span id="font-size-val" class="text-[11px] font-bold text-primary">Medium</span></div>
             <input type="range" min="1" max="3" value="2" step="1" oninput="updateFontSize(this.value)" class="w-full"/>
-            <div class="flex justify-between mt-1 text-[10px] text-slate-600"><span>Small</span><span>Medium</span><span>Large</span></div>
-          </div>
-          <!-- Animations -->
-          <div class="space-y-3">
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Animations</div>
-            <label class="flex items-center justify-between cursor-pointer">
-              <div><div class="text-sm font-semibold">Smooth Transitions</div><div class="text-[11px] text-slate-500">Page and component animations</div></div>
-              <div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div>
-            </label>
-            <label class="flex items-center justify-between cursor-pointer">
-              <div><div class="text-sm font-semibold">Reduce Motion</div><div class="text-[11px] text-slate-500">For accessibility or performance</div></div>
-              <div class="relative ml-4 flex-shrink-0"><input type="checkbox" class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div>
-            </label>
           </div>
         </div>
       </div>
 
       <!-- SCHEDULE -->
-      <div id="section-schedule" class="settings-section hidden space-y-6">
+      <div id="section-schedule" class="hidden space-y-6">
         <div><h2 class="text-xl font-black tracking-tight mb-1">Schedule Settings</h2><p class="text-slate-500 text-sm">Control how your timetable is generated.</p></div>
-        <div class="bg-[#191b22] rounded-xl p-6 border border-white/5 space-y-5">
+        <div class="bg-[#191b22] rounded-xl p-5 md:p-6 border border-white/5 space-y-5">
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Study Start Time</label><input type="time" value="08:00" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Study End Time</label><input type="time" value="22:00" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Study Start Time</label><input id="start-time" type="time" value="08:00" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Study End Time</label><input id="end-time" type="time" value="22:00" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
           </div>
           <div>
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Available Days</div>
             <div class="flex gap-2 flex-wrap">
-              <button onclick="toggleDay(this)" class="day-btn px-4 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Mon</button>
-              <button onclick="toggleDay(this)" class="day-btn px-4 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Tue</button>
-              <button onclick="toggleDay(this)" class="day-btn px-4 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Wed</button>
-              <button onclick="toggleDay(this)" class="day-btn px-4 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Thu</button>
-              <button onclick="toggleDay(this)" class="day-btn px-4 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Fri</button>
-              <button onclick="toggleDay(this)" class="day-btn px-4 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-500">Sat</button>
-              <button onclick="toggleDay(this)" class="day-btn px-4 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-500">Sun</button>
+              <button onclick="toggleDay(this)" data-day="1" class="day-btn px-3 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Mon</button>
+              <button onclick="toggleDay(this)" data-day="2" class="day-btn px-3 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Tue</button>
+              <button onclick="toggleDay(this)" data-day="3" class="day-btn px-3 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Wed</button>
+              <button onclick="toggleDay(this)" data-day="4" class="day-btn px-3 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Thu</button>
+              <button onclick="toggleDay(this)" data-day="5" class="day-btn px-3 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary">Fri</button>
+              <button onclick="toggleDay(this)" data-day="6" class="day-btn px-3 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-500">Sat</button>
+              <button onclick="toggleDay(this)" data-day="0" class="day-btn px-3 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-500">Sun</button>
             </div>
           </div>
           <div>
-            <div class="flex justify-between mb-2"><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Daily Study Goal</div><span id="study-goal-val" class="text-[11px] font-bold text-primary">3 hours</span></div>
-            <input type="range" min="1" max="8" value="3" oninput="document.getElementById('study-goal-val').textContent=this.value+' hours'" class="w-full"/>
-            <div class="flex justify-between mt-1 text-[10px] text-slate-600"><span>1h</span><span>4h</span><span>8h</span></div>
+            <div class="flex justify-between mb-2"><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Daily Study Goal</div><span id="daily-goal-val" class="text-[11px] font-bold text-primary">3 hours</span></div>
+            <input id="daily-goal" type="range" min="1" max="8" value="3" step="0.5" oninput="document.getElementById('daily-goal-val').textContent=this.value+' hours'" class="w-full"/>
           </div>
           <div>
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Auto-Reschedule Skipped Sessions</div>
-            <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Smart Rescheduling</div><div class="text-[11px] text-slate-500">Move skipped sessions to the next available slot</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-          </div>
-          <div>
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Revision Days</div>
-            <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Reserve Revision Days</div><div class="text-[11px] text-slate-500">Keep 1-2 days before exams for revision only</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-          </div>
-          <div>
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Scheduling Algorithm</div>
-            <select class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface">
-              <option>Adaptive (Recommended) — Urgency + Difficulty weighted</option>
-              <option>Balanced — Equal time per subject</option>
-              <option>Difficulty First — Hard subjects get more time</option>
-              <option>Deadline First — Nearest exam gets most sessions</option>
-            </select>
+            <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Auto-Reschedule Skipped Sessions</div><div class="text-[11px] text-slate-500">Move skipped sessions to next available slot</div></div><div class="relative ml-4 flex-shrink-0"><input id="auto-reschedule" type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
           </div>
         </div>
       </div>
 
       <!-- FOCUS & TIMER -->
-      <div id="section-focus" class="settings-section hidden space-y-6">
+      <div id="section-focus" class="hidden space-y-6">
         <div><h2 class="text-xl font-black tracking-tight mb-1">Focus & Timer</h2><p class="text-slate-500 text-sm">Fine-tune your Pomodoro and deep work settings.</p></div>
-        <div class="bg-[#191b22] rounded-xl p-6 border border-white/5 space-y-5">
+        <div class="bg-[#191b22] rounded-xl p-5 md:p-6 border border-white/5 space-y-5">
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Focus Duration (min)</label><input type="number" value="25" min="5" max="120" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Short Break (min)</label><input type="number" value="5" min="1" max="30" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Long Break (min)</label><input type="number" value="20" min="5" max="60" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Sessions Before Long Break</label><input type="number" value="4" min="2" max="8" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Focus Duration (min)</label><input id="focus-duration" type="number" value="25" min="5" max="120" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Short Break (min)</label><input id="short-break" type="number" value="5" min="1" max="30" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Long Break (min)</label><input id="long-break" type="number" value="20" min="5" max="60" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
+            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Sessions Before Long Break</label><input id="sessions-before" type="number" value="4" min="2" max="8" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
           </div>
-          <div class="space-y-3">
-            <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Auto-start Breaks</div><div class="text-[11px] text-slate-500">Automatically begin break when focus ends</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-            <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Auto-start Focus Sessions</div><div class="text-[11px] text-slate-500">Automatically start next session after break</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-            <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Sound Alerts</div><div class="text-[11px] text-slate-500">Play sound when session ends</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-            <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Browser Notifications</div><div class="text-[11px] text-slate-500">Pop-up when timer ends</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-            <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Tick Sound During Focus</div><div class="text-[11px] text-slate-500">Subtle clock tick to maintain rhythm</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-          </div>
-          <div>
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Alert Sound</div>
-            <select class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface">
-              <option>Bell</option><option>Ding</option><option>Digital</option><option>Chime</option><option>None</option>
-            </select>
-          </div>
+          <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Browser Notifications</div><div class="text-[11px] text-slate-500">Pop-up when timer ends</div></div><div class="relative ml-4 flex-shrink-0"><input id="browser-notify" type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
         </div>
       </div>
 
       <!-- NOTIFICATIONS -->
-      <div id="section-notifications" class="settings-section hidden space-y-6">
+      <div id="section-notifications" class="hidden space-y-6">
         <div><h2 class="text-xl font-black tracking-tight mb-1">Notifications</h2><p class="text-slate-500 text-sm">Control what, when, and how you get notified.</p></div>
-        <div class="bg-[#191b22] rounded-xl p-6 border border-white/5 space-y-4">
-          <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Notification Email</label><input type="email" value="chukwuemeka@uniport.edu.ng" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
+        <div class="bg-[#191b22] rounded-xl p-5 md:p-6 border border-white/5 space-y-4">
+          <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Notification Email</label><input id="notify-email" type="email" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
           <div class="space-y-3 pt-2">
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Email Notifications</div>
-            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer border border-white/5 hover:border-white/10 transition-all"><div><div class="text-sm font-semibold">Daily Study Reminder</div><div class="text-[11px] text-slate-500">Email at your preferred start time</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer border border-white/5 hover:border-white/10 transition-all"><div><div class="text-sm font-semibold">Falling Behind Warning</div><div class="text-[11px] text-slate-500">When you've missed 2+ sessions</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer border border-white/5 hover:border-white/10 transition-all"><div><div class="text-sm font-semibold">Exam Countdown Emails</div><div class="text-[11px] text-slate-500">7 days, 3 days, and 1 day before each exam</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer border border-white/5 hover:border-white/10 transition-all"><div><div class="text-sm font-semibold">Streak Reminder</div><div class="text-[11px] text-slate-500">Before you're about to lose your streak</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer border border-white/5 hover:border-white/10 transition-all"><div><div class="text-sm font-semibold">Weekly Summary</div><div class="text-[11px] text-slate-500">Every Sunday: your week in review</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer border border-white/5 hover:border-white/10 transition-all"><div><div class="text-sm font-semibold">New Milestone Unlocked</div><div class="text-[11px] text-slate-500">When you hit study achievements</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
+            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer"><div><div class="text-sm font-semibold">Daily Study Reminder</div></div><div class="relative"><input id="notify-daily" type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
+            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer"><div><div class="text-sm font-semibold">Falling Behind Warning</div></div><div class="relative"><input id="notify-falling" type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
+            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer"><div><div class="text-sm font-semibold">Exam Countdown Emails</div></div><div class="relative"><input id="notify-exam" type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
+            <label class="flex items-center justify-between p-3 bg-[#111319] rounded-lg cursor-pointer"><div><div class="text-sm font-semibold">Streak Reminder</div></div><div class="relative"><input id="notify-streak" type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
           </div>
           <div>
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 mt-4">Quiet Hours</div>
             <div class="grid grid-cols-2 gap-4">
-              <div><label class="text-[10px] font-bold text-slate-500 block mb-2">Start</label><input type="time" value="22:00" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
-              <div><label class="text-[10px] font-bold text-slate-500 block mb-2">End</label><input type="time" value="07:00" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
+              <div><label class="text-[10px] font-bold text-slate-500 block mb-2">Start</label><input id="quiet-start" type="time" value="22:00" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
+              <div><label class="text-[10px] font-bold text-slate-500 block mb-2">End</label><input id="quiet-end" type="time" value="07:00" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"/></div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- PRIVACY -->
-      <div id="section-privacy" class="settings-section hidden space-y-6">
+      <div id="section-privacy" class="hidden space-y-6">
         <div><h2 class="text-xl font-black tracking-tight mb-1">Privacy</h2><p class="text-slate-500 text-sm">Control who sees what.</p></div>
-        <div class="bg-[#191b22] rounded-xl p-6 border border-white/5 space-y-3">
-          <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Public Profile</div><div class="text-[11px] text-slate-500">Let others find you on the leaderboard</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-          <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Show Streak on Leaderboard</div><div class="text-[11px] text-slate-500">Display your streak publicly</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-          <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Analytics & Improvements</div><div class="text-[11px] text-slate-500">Help us improve by sharing anonymous usage data</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-          <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Two-Factor Authentication</div><div class="text-[11px] text-slate-500">Extra security for your account</div></div><div class="relative ml-4 flex-shrink-0"><input type="checkbox" class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
-        </div>
-      </div>
-
-      <!-- INTEGRATIONS -->
-      <div id="section-integrations" class="settings-section hidden space-y-6">
-        <div><h2 class="text-xl font-black tracking-tight mb-1">Integrations</h2><p class="text-slate-500 text-sm">Connect your favourite tools.</p></div>
-        <div class="bg-[#191b22] rounded-xl border border-white/5 divide-y divide-white/5">
-          <div class="flex items-center justify-between p-5"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-[#4285F4]/10 flex items-center justify-center"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg></div><div><div class="text-sm font-bold">Google Calendar</div><div class="text-[11px] text-slate-500">Sync your study sessions</div></div></div><button class="text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-on-surface transition-all">Connect</button></div>
-          <div class="flex items-center justify-between p-5"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center text-slate-400"><span class="material-symbols-outlined text-[20px]">notifications</span></div><div><div class="text-sm font-bold">Slack</div><div class="text-[11px] text-slate-500">Send study reminders to Slack</div></div></div><button class="text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-on-surface transition-all">Connect</button></div>
-          <div class="flex items-center justify-between p-5"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400"><span class="material-symbols-outlined text-[20px]">picture_as_pdf</span></div><div><div class="text-sm font-bold">Notion</div><div class="text-[11px] text-slate-500">Export your timetable to Notion</div></div></div><button class="text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-on-surface transition-all">Connect</button></div>
-        </div>
-      </div>
-
-      <!-- ACADEMIC -->
-      <div id="section-academic" class="settings-section hidden space-y-6">
-        <div><h2 class="text-xl font-black tracking-tight mb-1">Academic Details</h2><p class="text-slate-500 text-sm">Update your institution and course information.</p></div>
-        <div class="bg-[#191b22] rounded-xl p-6 border border-white/5 space-y-4">
-          <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">University</label><input type="text" value="University of Port Harcourt (UNIPORT)" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
-          <div class="grid grid-cols-2 gap-4">
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Faculty</label><select class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"><option selected>Engineering & Technology</option><option>Computing & Information Systems</option><option>Medicine & Health Sciences</option><option>Natural & Applied Sciences</option></select></div>
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Academic Year</label><select class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"><option>Year 1 / 100 Level</option><option>Year 2 / 200 Level</option><option selected>Year 3 / 300 Level</option><option>Year 4 / 400 Level</option><option>Year 5 / 500 Level</option></select></div>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Degree Type</label><select class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"><option selected>BEng</option><option>BSc</option><option>BA</option><option>MBBS</option><option>LLB</option></select></div>
-            <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Semester</label><select class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"><option selected>First Semester</option><option>Second Semester</option><option>Full Year</option></select></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DATA & EXPORT -->
-      <div id="section-data" class="settings-section hidden space-y-6">
-        <div><h2 class="text-xl font-black tracking-tight mb-1">Data & Export</h2><p class="text-slate-500 text-sm">Download or manage your data.</p></div>
-        <div class="bg-[#191b22] rounded-xl border border-white/5 divide-y divide-white/5">
-          <div class="flex items-center justify-between p-5"><div><div class="text-sm font-bold">Export Timetable as PDF</div><div class="text-[11px] text-slate-500">Download your full study schedule</div></div><button class="text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-on-surface transition-all flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">download</span>Export PDF</button></div>
-          <div class="flex items-center justify-between p-5"><div><div class="text-sm font-bold">Export Progress Report</div><div class="text-[11px] text-slate-500">Full analytics as CSV or PDF</div></div><button class="text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-on-surface transition-all flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">bar_chart</span>Export Stats</button></div>
-          <div class="flex items-center justify-between p-5"><div><div class="text-sm font-bold">Share Timetable</div><div class="text-[11px] text-slate-500">Generate a shareable link for friends</div></div><button class="text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-on-surface transition-all flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">share</span>Get Link</button></div>
-          <div class="flex items-center justify-between p-5"><div><div class="text-sm font-bold">Download All My Data</div><div class="text-[11px] text-slate-500">Full backup of your account data</div></div><button class="text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-on-surface transition-all flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">archive</span>Download</button></div>
+        <div class="bg-[#191b22] rounded-xl p-5 md:p-6 border border-white/5 space-y-3">
+          <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Public Profile</div></div><div class="relative"><input id="public-profile" type="checkbox" class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
+          <label class="flex items-center justify-between cursor-pointer"><div><div class="text-sm font-semibold">Show Streak on Leaderboard</div></div><div class="relative"><input id="show-streak" type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div></label>
         </div>
       </div>
 
       <!-- DANGER ZONE -->
-      <div id="section-danger" class="settings-section hidden space-y-6">
+      <div id="section-danger" class="hidden space-y-6">
         <div><h2 class="text-xl font-black tracking-tight mb-1 text-red-400">Danger Zone</h2><p class="text-slate-500 text-sm">Irreversible actions. Proceed with caution.</p></div>
         <div class="bg-[#191b22] rounded-xl border border-red-500/10 divide-y divide-white/5">
-          <div class="flex items-center justify-between p-5"><div><div class="text-sm font-bold">Reset All Progress</div><div class="text-[11px] text-slate-500">Clear all study sessions, streaks, and stats</div></div><button class="danger-btn text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 transition-all">Reset Progress</button></div>
-          <div class="flex items-center justify-between p-5"><div><div class="text-sm font-bold">Clear All Subjects</div><div class="text-[11px] text-slate-500">Remove all subjects and exam dates</div></div><button class="danger-btn text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 transition-all">Clear Subjects</button></div>
-          <div class="flex items-center justify-between p-5"><div><div class="text-sm font-bold text-red-400">Delete Account</div><div class="text-[11px] text-slate-500">Permanently delete your account and all data</div></div><button onclick="confirmDelete()" class="danger-btn text-xs font-bold px-4 py-2 rounded-lg border border-red-500/30 text-red-400 transition-all">Delete Account</button></div>
+          <div class="flex items-center justify-between p-5"><div><div class="text-sm font-bold">Reset All Progress</div><div class="text-[11px] text-slate-500">Clear all study sessions, streaks, and stats</div></div><button onclick="confirmAction('reset')" class="danger-btn text-xs font-bold px-4 py-2 rounded-lg border border-white/10 text-slate-400 transition-all">Reset Progress</button></div>
+          <div class="flex items-center justify-between p-5"><div><div class="text-sm font-bold text-red-400">Delete Account</div><div class="text-[11px] text-slate-500">Permanently delete your account and all data</div></div><button onclick="confirmAction('delete')" class="danger-btn text-xs font-bold px-4 py-2 rounded-lg border border-red-500/30 text-red-400 transition-all">Delete Account</button></div>
         </div>
       </div>
 
@@ -342,86 +239,164 @@
   </div>
 </div>
 
-<!-- Toast notification -->
-<div id="toast" class="hidden fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 bg-[#282a30] border border-white/10 rounded-full px-6 py-3 text-sm font-bold text-on-surface shadow-2xl z-[100] flex items-center gap-2">
-  <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings:'FILL' 1">check_circle</span>
-  <span id="toast-msg">Settings saved</span>
-</div>
-
 <!-- Mobile Bottom Nav -->
-<nav class="md:hidden fixed bottom-0 w-full z-50 bg-[#111319]/90 backdrop-blur-md border-t border-white/5 flex justify-around items-center h-16 px-4">
-  <a href="dashboard.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">home</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Home</span></a>
-  <a href="subjects.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">menu_book</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Subjects</span></a>
-  <a href="focus.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">timer</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Focus</span></a>
-  <a href="progress.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">bar_chart</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Stats</span></a>
-  <a href="settings.html" class="flex flex-col items-center text-[#C4C0FF]"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">settings</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Settings</span></a>
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-[#111319]/90 backdrop-blur-md border-t border-white/5 flex justify-around items-center h-14 px-4">
+  <a href="dashboard.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined text-xl">home</span><span class="text-[9px] uppercase">Home</span></a>
+  <a href="subjects.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined text-xl">menu_book</span><span class="text-[9px] uppercase">Subjects</span></a>
+  <a href="focus.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined text-xl">timer</span><span class="text-[9px] uppercase">Focus</span></a>
+  <a href="progress.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined text-xl">bar_chart</span><span class="text-[9px] uppercase">Stats</span></a>
+  <a href="settings.html" class="flex flex-col items-center text-[#C4C0FF]"><span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1">settings</span><span class="text-[9px] uppercase">Settings</span></a>
 </nav>
 
+<script src="js/supabase-client.js"></script>
 <script>
+  let currentUser = null;
+  let profileData = null;
+
+  async function initSettings() {
+    if (!window.Auth) { setTimeout(initSettings, 100); return; }
+    currentUser = await Auth.requireAuth();
+    if (!currentUser) return;
+    
+    try {
+      profileData = await ProfileAPI.get(currentUser.id);
+      
+      // Populate profile form
+      document.getElementById('input-fullname').value = profileData.full_name || '';
+      document.getElementById('input-nickname').value = profileData.nickname || '';
+      document.getElementById('input-email').value = currentUser.email || '';
+      document.getElementById('notify-email').value = profileData.notification_email || currentUser.email || '';
+      document.getElementById('profile-name').textContent = profileData.full_name || currentUser.email?.split('@')[0] || 'Student';
+      document.getElementById('profile-email').textContent = currentUser.email || '';
+      
+      const initials = (profileData.full_name || '?').charAt(0).toUpperCase();
+      document.getElementById('avatar-initials').textContent = initials;
+      
+      // Schedule settings
+      if (profileData.study_start_time) document.getElementById('start-time').value = profileData.study_start_time.slice(0,5);
+      if (profileData.study_end_time) document.getElementById('end-time').value = profileData.study_end_time.slice(0,5);
+      if (profileData.daily_study_goal_hours) {
+        document.getElementById('daily-goal').value = profileData.daily_study_goal_hours;
+        document.getElementById('daily-goal-val').textContent = profileData.daily_study_goal_hours + ' hours';
+      }
+      
+      // Focus settings
+      if (profileData.focus_duration_mins) document.getElementById('focus-duration').value = profileData.focus_duration_mins;
+      if (profileData.short_break_mins) document.getElementById('short-break').value = profileData.short_break_mins;
+      if (profileData.long_break_mins) document.getElementById('long-break').value = profileData.long_break_mins;
+      if (profileData.sessions_before_long_break) document.getElementById('sessions-before').value = profileData.sessions_before_long_break;
+      
+      // Notification preferences
+      document.getElementById('notify-daily').checked = profileData.notify_daily_reminder ?? true;
+      document.getElementById('notify-falling').checked = profileData.notify_falling_behind ?? true;
+      document.getElementById('notify-exam').checked = profileData.notify_exam_countdown ?? true;
+      document.getElementById('notify-streak').checked = profileData.notify_streak_reminder ?? true;
+      
+      if (profileData.quiet_hours_start) document.getElementById('quiet-start').value = profileData.quiet_hours_start.slice(0,5);
+      if (profileData.quiet_hours_end) document.getElementById('quiet-end').value = profileData.quiet_hours_end.slice(0,5);
+      
+    } catch (err) {
+      console.error('Settings error:', err);
+      showToast('Failed to load settings', 'error');
+    }
+  }
+  
+  async function saveSettings() {
+    if (!currentUser) return;
+    
+    const updates = {
+      full_name: document.getElementById('input-fullname').value,
+      nickname: document.getElementById('input-nickname').value,
+      notification_email: document.getElementById('notify-email').value,
+      study_start_time: document.getElementById('start-time').value,
+      study_end_time: document.getElementById('end-time').value,
+      daily_study_goal_hours: parseFloat(document.getElementById('daily-goal').value),
+      focus_duration_mins: parseInt(document.getElementById('focus-duration').value),
+      short_break_mins: parseInt(document.getElementById('short-break').value),
+      long_break_mins: parseInt(document.getElementById('long-break').value),
+      sessions_before_long_break: parseInt(document.getElementById('sessions-before').value),
+      notify_daily_reminder: document.getElementById('notify-daily').checked,
+      notify_falling_behind: document.getElementById('notify-falling').checked,
+      notify_exam_countdown: document.getElementById('notify-exam').checked,
+      notify_streak_reminder: document.getElementById('notify-streak').checked,
+      quiet_hours_start: document.getElementById('quiet-start').value,
+      quiet_hours_end: document.getElementById('quiet-end').value
+    };
+    
+    try {
+      await ProfileAPI.update(currentUser.id, updates);
+      showToast('Settings saved successfully!', 'success');
+    } catch (err) {
+      showToast(err.message || 'Failed to save settings', 'error');
+    }
+  }
+  
   function showSection(name) {
     document.querySelectorAll('.settings-section').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.settings-nav-item').forEach(n => {
       n.classList.remove('active');
       n.classList.add('text-slate-400');
     });
-    const el = document.getElementById('section-'+name);
-    el.classList.remove('hidden');
-    el.style.animation = 'slideIn 0.3s ease forwards';
+    document.getElementById('section-'+name).classList.remove('hidden');
     event.currentTarget.classList.add('active');
     event.currentTarget.classList.remove('text-slate-400');
   }
-
-  function saveSettings() {
-    const toast = document.getElementById('toast');
-    document.getElementById('toast-msg').textContent = 'Settings saved successfully';
-    toast.classList.remove('hidden');
-    toast.style.animation = 'fadeUp 0.3s ease forwards';
-    setTimeout(() => toast.classList.add('hidden'), 3000);
-  }
-
+  
   function setTheme(btn, theme) {
     document.querySelectorAll('.theme-btn').forEach(b => b.style.borderColor = 'rgba(255,255,255,0.1)');
     btn.style.borderColor = '#c4c0ff';
     if (theme === 'light') document.documentElement.classList.remove('dark');
     else document.documentElement.classList.add('dark');
   }
-
+  
   function setAccent(el, color) {
     document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
     el.classList.add('selected');
+    document.documentElement.style.setProperty('--primary-color', color);
   }
-
+  
   function toggleDay(btn) {
     const isActive = btn.classList.contains('text-primary');
     if (isActive) {
-      btn.className = 'day-btn px-4 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-500';
+      btn.className = 'day-btn px-3 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-500';
     } else {
-      btn.className = 'day-btn px-4 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary';
+      btn.className = 'day-btn px-3 py-2 rounded-full text-xs font-bold border border-primary/30 bg-primary/10 text-primary';
     }
   }
-
+  
   function updateFontSize(v) {
     const labels = {1:'Small',2:'Medium',3:'Large'};
     document.getElementById('font-size-val').textContent = labels[v];
+    const sizes = {1:'14px',2:'16px',3:'18px'};
+    document.body.style.fontSize = sizes[v];
   }
-
-  function confirmDelete() {
-    if (confirm('Are you absolutely sure? This cannot be undone.')) {
-      showToast('Account scheduled for deletion.');
+  
+  function confirmAction(action) {
+    if (action === 'reset') {
+      if (confirm('Are you sure? This will clear all your study progress. This cannot be undone.')) {
+        showToast('Progress reset requested', 'info');
+      }
+    } else if (action === 'delete') {
+      if (confirm('Are you absolutely sure? This will permanently delete your account and ALL data. This cannot be undone.')) {
+        showToast('Account deletion requested', 'error');
+      }
     }
   }
-
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    document.getElementById('toast-msg').textContent = msg;
-    toast.classList.remove('hidden');
-    setTimeout(() => toast.classList.add('hidden'), 3000);
+  
+  function showToast(message, type = 'success') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const icons = { success: 'check_circle', error: 'error', info: 'info' };
+    const colors = { success: '#c4c0ff', error: '#ffb4ab', info: '#ffb785' };
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#282a30;border:1px solid rgba(255,255,255,0.1);border-radius:100px;padding:10px 20px;font-size:13px;font-weight:700;color:#e2e2eb;z-index:9999;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,0.4);';
+    toast.innerHTML = `<span class="material-symbols-outlined" style="color:${colors[type]};font-size:18px">${icons[type]}</span>${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
   }
-
-  // Show profile section by default
-  document.getElementById('section-profile').classList.remove('hidden');
-  document.getElementById('section-profile').style.opacity = '1';
+  
+  initSettings();
 </script>
-  <script src="js/supabase-client.js"></script>
 </body>
 </html>
