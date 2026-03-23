@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Itachi Study Buddy - Subjects</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = { darkMode:"class", theme:{ extend:{ colors:{
+    "primary-fixed":"#e3dfff","surface-dim":"#111319","on-surface-variant":"#c7c4d8",
+    "on-background":"#e2e2eb","background":"#111319","on-secondary":"#2b2769","on-surface":"#e2e2eb",
+    "on-secondary-container":"#b4b1fc","tertiary-fixed-dim":"#ffb785","outline":"#918fa1",
+    "surface-container-lowest":"#0c0e14","error-container":"#93000a","on-error-container":"#ffdad6",
+    "on-tertiary-container":"#461f00","surface-container-high":"#282a30","on-error":"#690005",
+    "on-secondary-fixed":"#150f54","on-primary-fixed-variant":"#3622ca","tertiary":"#ffb785",
+    "error":"#ffb4ab","surface-container":"#1e1f26","tertiary-fixed":"#ffdcc6",
+    "secondary-container":"#444183","surface-container-highest":"#33343b",
+    "on-primary-container":"#1b0091","primary-fixed-dim":"#c4c0ff","surface-container-low":"#191b22",
+    "surface-bright":"#373940","on-tertiary-fixed-variant":"#713700","on-primary":"#2000a4",
+    "secondary-fixed":"#e3dfff","on-tertiary-fixed":"#301400","outline-variant":"#464555",
+    "tertiary-container":"#db761f","secondary-fixed-dim":"#c4c0ff","surface-variant":"#33343b",
+    "inverse-primary":"#4f44e2","on-primary-fixed":"#100069","surface":"#111319","secondary":"#c4c0ff",
+    "primary-container":"#8781ff","primary":"#c4c0ff","inverse-surface":"#e2e2eb","surface-tint":"#c4c0ff",
+    "inverse-on-surface":"#2e3037","on-secondary-fixed-variant":"#413f81","on-tertiary":"#502500"
+  }, fontFamily:{"headline":["Inter"],"body":["Inter"],"label":["Inter"]},
+  borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"} }}}
+</script>
+<style>
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  *{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .monastic-gradient{background:linear-gradient(135deg,#C4C0FF 0%,#8781FF 100%);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+  .fade-up{animation:fadeUp 0.5s ease forwards;}
+  .nav-link{transition:all 0.2s;}
+  .nav-link:hover{background:rgba(255,255,255,0.05);}
+  .subject-card{transition:all 0.3s;}
+  .subject-card:hover{transform:translateY(-2px);}
+  input:focus,select:focus{outline:none;border-color:#c4c0ff!important;box-shadow:0 0 0 2px rgba(196,192,255,0.12);}
+</style>
+<style>body{min-height:max(884px,100dvh);}</style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
+
+<!-- Add Subject Modal -->
+<div id="add-modal" class="hidden fixed inset-0 z-[100] flex items-end md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+  <div class="bg-[#191b22] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl" style="animation:slideUp 0.3s ease forwards">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="font-black text-lg tracking-tight">Add New Subject</h3>
+      <button onclick="document.getElementById('add-modal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-slate-400 text-lg">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Subject Name</label>
+        <div class="relative">
+          <input id="new-subject-name" type="text" placeholder="Search or type subject name..." oninput="filterSubjectSearch(this.value)" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-slate-600 transition-all" autocomplete="off"/>
+          <div id="subject-search-dropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#1e2029] border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl max-h-44 overflow-y-auto">
+          </div>
+        </div>
+      </div>
+      <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Exam Date</label><input type="date" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
+      <div>
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-3">Difficulty</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="setDiff(this,'easy')" class="diff-btn py-2.5 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">Easy</button>
+          <button onclick="setDiff(this,'medium')" class="diff-btn py-2.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-all">Medium</button>
+          <button onclick="setDiff(this,'hard')" class="diff-btn py-2.5 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all">Hard</button>
+        </div>
+      </div>
+      <div>
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-3">Priority</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="setPriority(this,'low')" class="priority-btn py-2.5 rounded-lg text-xs font-bold border border-white/10 text-slate-400 hover:bg-white/5 transition-all">Low</button>
+          <button onclick="setPriority(this,'medium')" class="priority-btn py-2.5 rounded-lg text-xs font-bold border border-white/10 text-slate-400 hover:bg-white/5 transition-all">Medium</button>
+          <button onclick="setPriority(this,'high')" class="priority-btn py-2.5 rounded-lg text-xs font-bold border border-white/10 text-slate-400 hover:bg-white/5 transition-all">High</button>
+        </div>
+      </div>
+      <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Total Topics</label><input type="number" placeholder="e.g. 50" min="1" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-slate-600 transition-all"/></div>
+      <button onclick="addSubject()" class="w-full py-3 rounded-xl monastic-gradient text-[#111319] font-black text-sm uppercase tracking-widest mt-2 hover:opacity-90 transition-all active:scale-95">
+        Add Subject
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="hidden md:flex flex-col p-6 gap-4 bg-[#191B22] h-full w-72 fixed left-0 top-0 z-[60] shadow-2xl">
+  <div class="mb-8"><span class="text-xs font-bold text-slate-500 tracking-[0.05em] uppercase">MONASTIC WORKSPACE</span></div>
+  <nav class="flex flex-col gap-2">
+    <a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="subjects.html" class="flex items-center gap-3 px-4 py-3 bg-[#282A30] text-[#C4C0FF] rounded-md font-bold text-sm"><span class="material-symbols-outlined">menu_book</span>Subjects</a>
+    <a href="timetable.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">calendar_today</span>Timetable</a>
+    <a href="focus.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">timer</span>Focus Mode</a>
+    <a href="progress.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">insights</span>Progress</a>
+    <a href="settings.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+</aside>
+
+<!-- Top Bar -->
+<header class="flex justify-between items-center w-full px-6 h-16 bg-[#111319] border-b border-white/5 fixed top-0 z-50 md:pl-80">
+  <div class="flex items-center gap-4">
+    <a href="dashboard.html" class="md:hidden text-[#C4C0FF]"><span class="material-symbols-outlined">arrow_back</span></a>
+    <h1 class="font-['Inter'] tracking-tight font-bold text-lg uppercase text-[#C4C0FF]">Subjects</h1>
+  </div>
+  <div class="flex items-center gap-2">
+    <button onclick="document.getElementById('add-modal').classList.remove('hidden')" class="hidden md:flex items-center gap-2 px-4 py-2 monastic-gradient text-[#111319] rounded-lg text-xs font-black uppercase tracking-widest hover:opacity-90 transition-all active:scale-95">
+      <span class="material-symbols-outlined text-[18px]">add</span>Add Subject
+    </button>
+    <button onclick="toggleDark()" class="text-[#C4C0FF] hover:bg-[#282A30] p-2 rounded transition-colors"><span class="material-symbols-outlined">dark_mode</span></button>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="pt-24 pb-32 px-6 md:pl-80 md:pr-12 max-w-7xl mx-auto min-h-screen bg-background">
+  <div class="mb-12 fade-up">
+    <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-2">Curriculum</h2>
+    <p class="text-on-surface-variant font-medium tracking-wide text-sm opacity-80 uppercase">Manage your academic focus points</p>
+  </div>
+
+  <div class="space-y-6" id="subjects-list">
+    <!-- Subject Card 1 -->
+    <div class="subject-card fade-up group bg-[#191B22] p-6 rounded-xl border border-white/5 hover:bg-[#282A30] transition-all duration-300" style="animation-delay:0.1s;opacity:0">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div class="space-y-1">
+          <div class="flex items-center gap-3">
+            <h3 class="text-xl font-bold text-on-surface tracking-tight">Quantum Mechanics</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase bg-error-container text-on-error-container border border-error/20">Hard</span>
+          </div>
+          <p class="text-on-surface-variant text-sm flex items-center gap-2"><span class="material-symbols-outlined text-sm">event</span>Exam: Nov 24, 2023</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="bg-surface-container-highest px-4 py-2 rounded-full border border-outline-variant/15">
+            <span class="text-[10px] font-black uppercase tracking-widest text-primary">12 Days Remaining</span>
+          </div>
+          <button onclick="editSubject(this)" class="w-8 h-8 rounded-lg bg-[#282a30] flex items-center justify-center text-slate-500 hover:text-on-surface hover:bg-[#33343b] transition-all"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+          <button onclick="deleteSubject(this)" class="w-8 h-8 rounded-lg bg-[#282a30] flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <div class="flex justify-between items-end mb-1">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Syllabus Coverage</span>
+          <span class="text-sm font-bold text-primary">42%</span>
+        </div>
+        <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden">
+          <div class="monastic-gradient h-full transition-all duration-700" style="width:42%"></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 mt-4">
+        <a href="focus.html" class="flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"><span class="material-symbols-outlined text-[14px]">timer</span>Start Study</a>
+        <span class="text-white/10">|</span>
+        <a href="progress.html" class="flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[14px]">insights</span>View Progress</a>
+      </div>
+    </div>
+
+    <!-- Subject Card 2 -->
+    <div class="subject-card fade-up group bg-[#191B22] p-6 rounded-xl border border-white/5 hover:bg-[#282A30] transition-all duration-300" style="animation-delay:0.2s;opacity:0">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div class="space-y-1">
+          <div class="flex items-center gap-3">
+            <h3 class="text-xl font-bold text-on-surface tracking-tight">Linear Algebra</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase bg-tertiary-container/30 text-tertiary border border-tertiary/20">Medium</span>
+          </div>
+          <p class="text-on-surface-variant text-sm flex items-center gap-2"><span class="material-symbols-outlined text-sm">event</span>Exam: Dec 05, 2023</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="bg-surface-container-highest px-4 py-2 rounded-full border border-outline-variant/15">
+            <span class="text-[10px] font-black uppercase tracking-widest text-primary">23 Days Remaining</span>
+          </div>
+          <button onclick="editSubject(this)" class="w-8 h-8 rounded-lg bg-[#282a30] flex items-center justify-center text-slate-500 hover:text-on-surface hover:bg-[#33343b] transition-all"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+          <button onclick="deleteSubject(this)" class="w-8 h-8 rounded-lg bg-[#282a30] flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <div class="flex justify-between items-end mb-1">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Syllabus Coverage</span>
+          <span class="text-sm font-bold text-primary">78%</span>
+        </div>
+        <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden">
+          <div class="monastic-gradient h-full transition-all duration-700" style="width:78%"></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 mt-4">
+        <a href="focus.html" class="flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"><span class="material-symbols-outlined text-[14px]">timer</span>Start Study</a>
+        <span class="text-white/10">|</span>
+        <a href="progress.html" class="flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[14px]">insights</span>View Progress</a>
+      </div>
+    </div>
+
+    <!-- Subject Card 3 -->
+    <div class="subject-card fade-up group bg-[#191B22] p-6 rounded-xl border border-white/5 hover:bg-[#282A30] transition-all duration-300" style="animation-delay:0.3s;opacity:0">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div class="space-y-1">
+          <div class="flex items-center gap-3">
+            <h3 class="text-xl font-bold text-on-surface tracking-tight">Philosophy of Science</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Easy</span>
+          </div>
+          <p class="text-on-surface-variant text-sm flex items-center gap-2"><span class="material-symbols-outlined text-sm">event</span>Exam: Dec 14, 2023</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="bg-surface-container-highest px-4 py-2 rounded-full border border-outline-variant/15">
+            <span class="text-[10px] font-black uppercase tracking-widest text-primary">32 Days Remaining</span>
+          </div>
+          <button onclick="editSubject(this)" class="w-8 h-8 rounded-lg bg-[#282a30] flex items-center justify-center text-slate-500 hover:text-on-surface hover:bg-[#33343b] transition-all"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+          <button onclick="deleteSubject(this)" class="w-8 h-8 rounded-lg bg-[#282a30] flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <div class="flex justify-between items-end mb-1">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Syllabus Coverage</span>
+          <span class="text-sm font-bold text-primary">15%</span>
+        </div>
+        <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden">
+          <div class="monastic-gradient h-full transition-all duration-700" style="width:15%"></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 mt-4">
+        <a href="focus.html" class="flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"><span class="material-symbols-outlined text-[14px]">timer</span>Start Study</a>
+        <span class="text-white/10">|</span>
+        <a href="progress.html" class="flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[14px]">insights</span>View Progress</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-12 flex justify-center fade-up" style="animation-delay:0.4s;opacity:0">
+    <button onclick="document.getElementById('add-modal').classList.remove('hidden')" class="flex items-center gap-2 px-8 py-4 monastic-gradient text-on-primary font-bold rounded-lg shadow-xl shadow-primary/10 hover:shadow-primary/20 hover:opacity-90 transition-all active:scale-95 group">
+      <span class="material-symbols-outlined">add_circle</span>
+      <span class="uppercase tracking-widest text-xs font-black">Add New Subject</span>
+    </button>
+  </div>
+</main>
+
+<!-- Mobile Bottom Nav -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 pb-safe bg-[#111319]/80 backdrop-blur-md border-t border-white/5 flex justify-around items-center h-16 px-4 shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
+  <a href="dashboard.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-medium tracking-wider uppercase">Home</span></a>
+  <a href="subjects.html" class="flex flex-col items-center text-[#C4C0FF] relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-[#C4C0FF] after:rounded-full"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">menu_book</span><span class="text-[10px] font-medium tracking-wider uppercase">Subjects</span></a>
+  <a href="focus.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">timer</span><span class="text-[10px] font-medium tracking-wider uppercase">Focus</span></a>
+  <a href="progress.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">bar_chart</span><span class="text-[10px] font-medium tracking-wider uppercase">Stats</span></a>
+  <a href="settings.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">settings</span><span class="text-[10px] font-medium tracking-wider uppercase">Settings</span></a>
+</nav>
+
+<!-- FAB -->
+<button onclick="document.getElementById('add-modal').classList.remove('hidden')" class="fixed bottom-24 right-6 md:bottom-12 md:right-12 z-[70] w-14 h-14 monastic-gradient text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-transform md:hidden">
+  <span class="material-symbols-outlined">add</span>
+</button>
+
+<script>
+  const allSubjects = [
+    "Advanced Calculus","Linear Algebra","Quantum Mechanics","Thermodynamics","Fluid Mechanics",
+    "Organic Chemistry","Biochemistry","Anatomy","Physiology","Pharmacology","Constitutional Law",
+    "Contract Law","Criminal Law","Computer Architecture","Data Structures","Machine Learning",
+    "Philosophy of Science","Sociology","Psychology","Economics","Statistics","Microbiology",
+    "Genetics","Cell Biology","Structural Analysis","Engineering Mathematics","Signal Processing",
+    "Digital Electronics","Control Systems","Operating Systems","Database Systems","Networking",
+    "Software Engineering","Artificial Intelligence","Cybersecurity","Web Development"
+  ];
+
+  function filterSubjectSearch(query) {
+    const dropdown = document.getElementById('subject-search-dropdown');
+    if (!query) { dropdown.classList.add('hidden'); return; }
+    const matches = allSubjects.filter(s => s.toLowerCase().includes(query.toLowerCase()));
+    if (!matches.length) { dropdown.classList.add('hidden'); return; }
+    dropdown.innerHTML = matches.slice(0,6).map(s => `
+      <button onclick="selectSubject('${s}')" class="w-full text-left px-4 py-2.5 text-sm text-on-surface-variant hover:bg-[#282a30] hover:text-on-surface transition-colors border-b border-white/5 last:border-0">${s}</button>
+    `).join('');
+    dropdown.classList.remove('hidden');
+  }
+
+  function selectSubject(name) {
+    document.getElementById('new-subject-name').value = name;
+    document.getElementById('subject-search-dropdown').classList.add('hidden');
+  }
+
+  function setDiff(btn, level) {
+    document.querySelectorAll('.diff-btn').forEach(b => b.style.opacity='0.5');
+    btn.style.opacity='1';
+    btn.style.transform='scale(1.05)';
+    setTimeout(() => btn.style.transform='scale(1)',200);
+  }
+
+  function setPriority(btn, level) {
+    document.querySelectorAll('.priority-btn').forEach(b => {
+      b.className='priority-btn py-2.5 rounded-lg text-xs font-bold border border-white/10 text-slate-400 hover:bg-white/5 transition-all';
+    });
+    btn.className='priority-btn py-2.5 rounded-lg text-xs font-bold border border-primary/30 bg-primary/10 text-primary transition-all';
+  }
+
+  function addSubject() {
+    const name = document.getElementById('new-subject-name').value;
+    if (!name.trim()) return;
+    showToast('Subject added successfully');
+    document.getElementById('add-modal').classList.add('hidden');
+  }
+
+  function deleteSubject(btn) {
+    const card = btn.closest('.subject-card');
+    card.style.animation='fadeUp 0.3s ease reverse forwards';
+    setTimeout(() => card.remove(), 300);
+    showToast('Subject removed');
+  }
+
+  function editSubject(btn) {
+    const card = btn.closest('.subject-card');
+    const name = card.querySelector('h3').textContent;
+    document.getElementById('new-subject-name').value = name;
+    document.getElementById('add-modal').classList.remove('hidden');
+  }
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className='fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 bg-[#282a30] border border-white/10 rounded-full px-5 py-2.5 text-xs font-bold text-on-surface shadow-2xl z-[200] flex items-center gap-2';
+    t.innerHTML=`<span class="material-symbols-outlined text-primary text-[16px]" style="font-variation-settings:'FILL' 1">check_circle</span>${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  }
+
+  function toggleDark() { document.documentElement.classList.toggle('dark'); }
+
+  // Animate cards
+  document.querySelectorAll('.fade-up').forEach((el,i) => setTimeout(() => el.style.opacity='1', 80+i*80));
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#new-subject-name') && !e.target.closest('#subject-search-dropdown')) {
+      document.getElementById('subject-search-dropdown').classList.add('hidden');
+    }
+  });
+
+  let currentUser = null;
+let subjectsList = [];
+
+async function initSubjects() {
+  currentUser = await Auth.requireAuth();
+  if (!currentUser) return;
+  
+  subjectsList = await SubjectsAPI.getAll(currentUser.id);
+  renderSubjects(subjectsList);
+}
+
+async function addSubject() {
+  const name = document.getElementById('new-subject-name').value;
+  const difficulty = document.querySelector('.diff-btn.active')?.dataset.level || 'medium';
+  const examDate = document.querySelector('input[type=date]').value;
+  const totalTopics = parseInt(document.querySelector('input[type=number]').value) || 50;
+  
+  try {
+    const subject = await SubjectsAPI.create(currentUser.id, {
+      name, difficulty, exam_date: examDate, total_topics: totalTopics,
+    });
+    subjectsList.push(subject);
+    renderSubjects(subjectsList);
+    document.getElementById('add-modal').classList.add('hidden');
+    
+    // Regenerate schedule with new subject
+    await SchedulerAPI.generate(currentUser.id);
+    showToast('Subject added & schedule updated!');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+initSubjects();
+
+</script>
+  <script src="js/supabase-client.js"></script>
+</body>
+</html>

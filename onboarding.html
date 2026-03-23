@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Itachi Study Buddy — Setup</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = { darkMode:"class", theme:{ extend:{ colors:{
+    "background":"#111319","surface-container-low":"#191b22","surface-container-high":"#282a30",
+    "primary":"#c4c0ff","primary-container":"#8781ff","on-primary":"#2000a4",
+    "on-surface":"#e2e2eb","on-surface-variant":"#c7c4d8","outline-variant":"#464555",
+    "tertiary":"#ffb785","error":"#ffb4ab","surface-container-lowest":"#0c0e14"
+  }}}}
+</script>
+<style>
+  *{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  @keyframes slideInRight{from{opacity:0;transform:translateX(32px);}to{opacity:1;transform:translateX(0);}}
+  @keyframes slideInLeft{from{opacity:0;transform:translateX(-32px);}to{opacity:1;transform:translateX(0);}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes popIn{from{opacity:0;transform:scale(0.85);}to{opacity:1;transform:scale(1);}}
+  .step-enter{animation:slideInRight 0.4s cubic-bezier(0.16,1,0.3,1) forwards;}
+  .step-exit{animation:slideInLeft 0.3s ease forwards reverse;}
+  .fade-up{animation:fadeUp 0.5s ease forwards;}
+  input:focus{outline:none;border-color:#c4c0ff!important;box-shadow:0 0 0 2px rgba(196,192,255,0.15);}
+  .btn-primary{background:linear-gradient(135deg,#c4c0ff 0%,#8781ff 100%);transition:all 0.2s;}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(135,129,255,0.3);}
+  .btn-primary:active{transform:translateY(0);}
+  .subject-chip{transition:all 0.2s;cursor:pointer;}
+  .subject-chip.selected{background:rgba(196,192,255,0.15);border-color:#c4c0ff;color:#c4c0ff;}
+  .subject-chip:not(.selected):hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);}
+  .pref-card{transition:all 0.2s;cursor:pointer;border:2px solid transparent;}
+  .pref-card.selected{border-color:#c4c0ff;background:rgba(196,192,255,0.08);}
+  .pref-card:not(.selected):hover{border-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);}
+  .difficulty-btn{transition:all 0.15s;cursor:pointer;}
+  .bg-grid{background-image:linear-gradient(rgba(196,192,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(196,192,255,0.02) 1px,transparent 1px);background-size:40px 40px;}
+  .avatar-upload:hover .avatar-overlay{opacity:1;}
+  .avatar-overlay{opacity:0;transition:opacity 0.2s;}
+</style>
+</head>
+<body class="bg-[#111319] min-h-screen text-[#e2e2eb] overflow-x-hidden">
+
+<div class="bg-grid fixed inset-0 z-0 pointer-events-none"></div>
+<div class="fixed top-0 right-0 w-[500px] h-[500px] bg-primary/4 blur-[150px] rounded-full pointer-events-none z-0"></div>
+
+<div class="relative z-10 min-h-screen flex flex-col">
+
+  <!-- Top bar -->
+  <header class="flex items-center justify-between px-6 md:px-12 py-6">
+    <div class="flex items-center gap-2">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+        <path d="M16 4 L20 12 L28 13 L22 19 L23.5 27 L16 23 L8.5 27 L10 19 L4 13 L12 12 Z" fill="none" stroke="#c4c0ff" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="16" cy="16" r="4" fill="#8781ff" opacity="0.6"/>
+      </svg>
+      <span class="font-black text-sm tracking-tight text-primary uppercase">Itachi Study Buddy</span>
+    </div>
+    <span id="step-counter" class="text-[11px] text-slate-500 font-bold uppercase tracking-widest">Step 1 of 5</span>
+  </header>
+
+  <!-- Progress bar -->
+  <div class="px-6 md:px-12 mb-8">
+    <div class="h-1 bg-white/5 rounded-full overflow-hidden">
+      <div id="progress-bar" class="h-full bg-gradient-to-r from-primary to-primary-container rounded-full transition-all duration-500" style="width:20%"></div>
+    </div>
+    <!-- Step dots -->
+    <div class="flex justify-between mt-3">
+      <div id="dot-1" class="flex flex-col items-center gap-1"><div class="w-2 h-2 rounded-full bg-primary transition-all"></div><span class="text-[9px] text-primary font-bold uppercase tracking-wider">You</span></div>
+      <div id="dot-2" class="flex flex-col items-center gap-1"><div class="w-2 h-2 rounded-full bg-white/10 transition-all"></div><span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Uni</span></div>
+      <div id="dot-3" class="flex flex-col items-center gap-1"><div class="w-2 h-2 rounded-full bg-white/10 transition-all"></div><span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Subjects</span></div>
+      <div id="dot-4" class="flex flex-col items-center gap-1"><div class="w-2 h-2 rounded-full bg-white/10 transition-all"></div><span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Prefs</span></div>
+      <div id="dot-5" class="flex flex-col items-center gap-1"><div class="w-2 h-2 rounded-full bg-white/10 transition-all"></div><span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Done</span></div>
+    </div>
+  </div>
+
+  <!-- Steps container -->
+  <div class="flex-1 px-6 md:px-12 max-w-2xl mx-auto w-full pb-12">
+
+    <!-- STEP 1: Who are you? -->
+    <div id="step-1" class="step-enter">
+      <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-2">Who are <span class="text-primary">you?</span></h2>
+      <p class="text-slate-500 text-sm mb-10">Let's personalise your experience from day one.</p>
+
+      <!-- Avatar upload -->
+      <div class="flex justify-center mb-10">
+        <div class="relative avatar-upload cursor-pointer group">
+          <div id="avatar-preview" class="w-24 h-24 rounded-2xl bg-[#191b22] border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden group-hover:border-primary/50 transition-all">
+            <span class="material-symbols-outlined text-slate-600 text-4xl">person</span>
+          </div>
+          <div class="avatar-overlay absolute inset-0 rounded-2xl bg-black/60 flex items-center justify-center">
+            <span class="material-symbols-outlined text-white text-xl">photo_camera</span>
+          </div>
+          <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-primary-container rounded-full flex items-center justify-center shadow-lg">
+            <span class="material-symbols-outlined text-[16px] text-white">add</span>
+          </div>
+          <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewAvatar(this)"/>
+        </div>
+      </div>
+
+      <div class="space-y-5">
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Full Name</label>
+          <input id="student-name" type="text" placeholder="e.g. Chukwuemeka Obi" class="w-full bg-[#191b22] border border-white/10 rounded-xl px-4 py-4 text-base text-on-surface placeholder:text-slate-600 transition-all"/>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Preferred Name / Nickname</label>
+          <input id="student-nickname" type="text" placeholder="What should we call you?" class="w-full bg-[#191b22] border border-white/10 rounded-xl px-4 py-4 text-base text-on-surface placeholder:text-slate-600 transition-all"/>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Date of Birth</label>
+          <input type="date" class="w-full bg-[#191b22] border border-white/10 rounded-xl px-4 py-4 text-base text-on-surface transition-all"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Institution -->
+    <div id="step-2" class="hidden">
+      <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-2">Your <span class="text-primary">Institution</span></h2>
+      <p class="text-slate-500 text-sm mb-10">Tell us where you study. We'll tailor everything.</p>
+
+      <div class="space-y-5">
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">University / Institution Name</label>
+          <div class="relative">
+            <input id="university-input" type="text" placeholder="e.g. University of Lagos" oninput="filterUnis(this.value)" class="w-full bg-[#191b22] border border-white/10 rounded-xl px-4 py-4 text-base text-on-surface placeholder:text-slate-600 transition-all" autocomplete="off"/>
+            <div id="uni-dropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#1e2029] border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl max-h-52 overflow-y-auto">
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Faculty / Department</label>
+          <select id="faculty-select" onchange="updateSubjectsByFaculty()" class="w-full bg-[#191b22] border border-white/10 rounded-xl px-4 py-4 text-base text-on-surface transition-all appearance-none cursor-pointer">
+            <option value="">Select your faculty...</option>
+            <option value="engineering">Engineering & Technology</option>
+            <option value="medicine">Medicine & Health Sciences</option>
+            <option value="science">Natural & Applied Sciences</option>
+            <option value="law">Law</option>
+            <option value="arts">Arts & Humanities</option>
+            <option value="business">Business & Economics</option>
+            <option value="education">Education</option>
+            <option value="social">Social Sciences</option>
+            <option value="computing">Computing & Information Systems</option>
+            <option value="architecture">Architecture & Built Environment</option>
+            <option value="agriculture">Agriculture & Veterinary Sciences</option>
+            <option value="pharmacy">Pharmacy & Pharmaceutical Sciences</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Academic Year</label>
+            <select class="w-full bg-[#191b22] border border-white/10 rounded-xl px-4 py-4 text-sm text-on-surface transition-all appearance-none cursor-pointer">
+              <option>Year 1 / 100 Level</option>
+              <option>Year 2 / 200 Level</option>
+              <option>Year 3 / 300 Level</option>
+              <option>Year 4 / 400 Level</option>
+              <option>Year 5 / 500 Level</option>
+              <option>Postgraduate</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Degree Type</label>
+            <select class="w-full bg-[#191b22] border border-white/10 rounded-xl px-4 py-4 text-sm text-on-surface transition-all appearance-none cursor-pointer">
+              <option>BSc</option>
+              <option>BA</option>
+              <option>BEng</option>
+              <option>MBBS</option>
+              <option>LLB</option>
+              <option>HND</option>
+              <option>MSc</option>
+              <option>MBA</option>
+              <option>PhD</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Semester</label>
+          <div class="grid grid-cols-3 gap-3">
+            <button onclick="selectSemester(this,'First')" class="pref-card py-3 rounded-xl bg-[#191b22] border border-white/10 text-sm font-semibold text-center">First</button>
+            <button onclick="selectSemester(this,'Second')" class="pref-card py-3 rounded-xl bg-[#191b22] border border-white/10 text-sm font-semibold text-center">Second</button>
+            <button onclick="selectSemester(this,'Full Year')" class="pref-card py-3 rounded-xl bg-[#191b22] border border-white/10 text-sm font-semibold text-center">Full Year</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Subjects -->
+    <div id="step-3" class="hidden">
+      <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-2">Your <span class="text-primary">Subjects</span></h2>
+      <p class="text-slate-500 text-sm mb-6">Select from your faculty's curriculum. Add exam dates & difficulty.</p>
+
+      <!-- Search -->
+      <div class="relative mb-6">
+        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-[20px]">search</span>
+        <input type="text" placeholder="Search subjects..." oninput="filterSubjects(this.value)" class="w-full bg-[#191b22] border border-white/10 rounded-xl pl-12 pr-4 py-4 text-sm text-on-surface placeholder:text-slate-600 transition-all"/>
+      </div>
+
+      <!-- Faculty label -->
+      <div id="faculty-label" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">All Subjects</div>
+
+      <!-- Subject chips -->
+      <div id="subject-chips" class="flex flex-wrap gap-2 mb-8">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Selected subjects with exam config -->
+      <div id="selected-subjects-config" class="space-y-4">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- STEP 4: Study Preferences -->
+    <div id="step-4" class="hidden">
+      <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-2">Study <span class="text-primary">Preferences</span></h2>
+      <p class="text-slate-500 text-sm mb-10">How do you roll? We'll build your schedule around you.</p>
+
+      <div class="space-y-8">
+        <!-- Study time -->
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-4">Preferred Study Time</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="selectPref(this,'time','morning')" class="pref-card p-4 rounded-xl bg-[#191b22] border border-white/10 text-left">
+              <div class="text-xl mb-1">🌅</div>
+              <div class="font-bold text-sm">Morning</div>
+              <div class="text-[11px] text-slate-500">6AM — 12PM</div>
+            </button>
+            <button onclick="selectPref(this,'time','afternoon')" class="pref-card p-4 rounded-xl bg-[#191b22] border border-white/10 text-left">
+              <div class="text-xl mb-1">☀️</div>
+              <div class="font-bold text-sm">Afternoon</div>
+              <div class="text-[11px] text-slate-500">12PM — 6PM</div>
+            </button>
+            <button onclick="selectPref(this,'time','evening')" class="pref-card p-4 rounded-xl bg-[#191b22] border border-white/10 text-left">
+              <div class="text-xl mb-1">🌆</div>
+              <div class="font-bold text-sm">Evening</div>
+              <div class="text-[11px] text-slate-500">6PM — 10PM</div>
+            </button>
+            <button onclick="selectPref(this,'time','night')" class="pref-card p-4 rounded-xl bg-[#191b22] border border-white/10 text-left">
+              <div class="text-xl mb-1">🌙</div>
+              <div class="font-bold text-sm">Night Owl</div>
+              <div class="text-[11px] text-slate-500">10PM — 2AM</div>
+            </button>
+          </div>
+        </div>
+        <!-- Daily goal -->
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-4">Daily Study Goal</label>
+          <div class="grid grid-cols-4 gap-3">
+            <button onclick="selectPref(this,'goal','1hr')" class="pref-card py-3 rounded-xl bg-[#191b22] border border-white/10 text-sm font-bold text-center">1 hr</button>
+            <button onclick="selectPref(this,'goal','2hr')" class="pref-card py-3 rounded-xl bg-[#191b22] border border-white/10 text-sm font-bold text-center">2 hrs</button>
+            <button onclick="selectPref(this,'goal','3hr')" class="pref-card py-3 rounded-xl bg-[#191b22] border border-white/10 text-sm font-bold text-center selected">3 hrs</button>
+            <button onclick="selectPref(this,'goal','4hr')" class="pref-card py-3 rounded-xl bg-[#191b22] border border-white/10 text-sm font-bold text-center">4+ hrs</button>
+          </div>
+        </div>
+        <!-- Break style -->
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-4">Break Style</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="selectPref(this,'break','pomodoro')" class="pref-card p-4 rounded-xl bg-[#191b22] border border-white/10 text-left selected">
+              <div class="font-bold text-sm mb-1">⏱ Pomodoro</div>
+              <div class="text-[11px] text-slate-500">25 min work · 5 min break</div>
+            </button>
+            <button onclick="selectPref(this,'break','deep')" class="pref-card p-4 rounded-xl bg-[#191b22] border border-white/10 text-left">
+              <div class="font-bold text-sm mb-1">🔥 Deep Work</div>
+              <div class="text-[11px] text-slate-500">90 min work · 20 min break</div>
+            </button>
+            <button onclick="selectPref(this,'break','short')" class="pref-card p-4 rounded-xl bg-[#191b22] border border-white/10 text-left">
+              <div class="font-bold text-sm mb-1">⚡ Sprint</div>
+              <div class="text-[11px] text-slate-500">15 min work · 3 min break</div>
+            </button>
+            <button onclick="selectPref(this,'break','custom')" class="pref-card p-4 rounded-xl bg-[#191b22] border border-white/10 text-left">
+              <div class="font-bold text-sm mb-1">🎛 Custom</div>
+              <div class="text-[11px] text-slate-500">Set your own intervals</div>
+            </button>
+          </div>
+        </div>
+        <!-- Notifications -->
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-4">Notifications</label>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-4 bg-[#191b22] rounded-xl border border-white/10 cursor-pointer hover:border-white/20 transition-all">
+              <div><div class="text-sm font-semibold">Daily Study Reminder</div><div class="text-[11px] text-slate-500">Get nudged to start your session</div></div>
+              <div class="relative"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div>
+            </label>
+            <label class="flex items-center justify-between p-4 bg-[#191b22] rounded-xl border border-white/10 cursor-pointer hover:border-white/20 transition-all">
+              <div><div class="text-sm font-semibold">Falling Behind Alert</div><div class="text-[11px] text-slate-500">Get warned when you skip too much</div></div>
+              <div class="relative"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div>
+            </label>
+            <label class="flex items-center justify-between p-4 bg-[#191b22] rounded-xl border border-white/10 cursor-pointer hover:border-white/20 transition-all">
+              <div><div class="text-sm font-semibold">Exam Countdown Emails</div><div class="text-[11px] text-slate-500">3 days, 1 day before each exam</div></div>
+              <div class="relative"><input type="checkbox" class="sr-only peer"/><div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-primary-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: You're all set -->
+    <div id="step-5" class="hidden text-center">
+      <div class="flex flex-col items-center gap-6">
+        <div style="animation:popIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards" class="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-2xl shadow-primary/20">
+          <span class="material-symbols-outlined text-4xl text-[#111319]" style="font-variation-settings:'FILL' 1">verified</span>
+        </div>
+        <div>
+          <h2 class="text-3xl font-black tracking-tight mb-2">You're <span class="text-primary">Ready.</span></h2>
+          <p class="text-slate-400 text-sm">Your study battlefield is configured. Time to dominate.</p>
+        </div>
+        <!-- Summary card -->
+        <div class="w-full bg-[#191b22] rounded-2xl border border-white/5 p-6 text-left space-y-4">
+          <div class="flex items-center gap-3 pb-4 border-b border-white/5">
+            <div class="w-12 h-12 rounded-xl bg-[#282a30] flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary">person</span>
+            </div>
+            <div>
+              <div id="summary-name" class="font-bold text-on-surface">Student</div>
+              <div id="summary-uni" class="text-[11px] text-slate-500">University</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div><div id="summary-subjects" class="text-2xl font-black text-primary">0</div><div class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Subjects</div></div>
+            <div><div class="text-2xl font-black text-tertiary">3h</div><div class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Daily Goal</div></div>
+            <div><div class="text-2xl font-black text-on-surface">🔥</div><div class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Ready</div></div>
+          </div>
+        </div>
+        <button onclick="window.location.href='dashboard.html'" class="btn-primary w-full py-4 rounded-xl text-sm font-black uppercase tracking-widest text-[#111319]">
+          Enter the Arena →
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div id="nav-buttons" class="flex items-center justify-between mt-12 pt-6 border-t border-white/5">
+      <button id="btn-back" onclick="prevStep()" class="px-6 py-3 rounded-xl border border-white/10 text-sm font-bold text-slate-400 hover:text-on-surface hover:border-white/20 transition-all invisible">
+        ← Back
+      </button>
+      <button id="btn-next" onclick="nextStep()" class="btn-primary px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest text-[#111319]">
+        Continue →
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 5;
+  const selectedSubjects = new Set();
+
+  const universities = [
+    "University of Lagos (UNILAG)","University of Ibadan (UI)","Obafemi Awolowo University (OAU)",
+    "Ahmadu Bello University (ABU)","University of Nigeria, Nsukka (UNN)","University of Benin (UNIBEN)",
+    "University of Port Harcourt (UNIPORT)","Federal University of Technology, Akure (FUTA)",
+    "Lagos State University (LASU)","Covenant University","Babcock University","Landmark University",
+    "Pan-Atlantic University","American University of Nigeria (AUN)","University of Cape Town",
+    "University of Pretoria","Cairo University","University of Nairobi","Makerere University",
+    "MIT","Stanford University","Harvard University","Oxford University","Cambridge University",
+    "Imperial College London","University of Toronto","McGill University","ETH Zurich",
+    "National University of Singapore","University of Melbourne","University of Ghana",
+    "Kwame Nkrumah University of Science and Technology (KNUST)","University of Zambia",
+    "University of Zimbabwe","Addis Ababa University"
+  ];
+
+  const subjectsByFaculty = {
+    engineering: ["Engineering Mathematics","Thermodynamics","Fluid Mechanics","Solid Mechanics","Materials Science","Electrical Circuits","Signal Processing","Control Systems","Structural Analysis","Engineering Drawing","Machine Design","Heat Transfer","Manufacturing Processes","Engineering Economics","Project Management"],
+    medicine: ["Anatomy","Physiology","Biochemistry","Pharmacology","Pathology","Microbiology","Immunology","Clinical Medicine","Surgery","Paediatrics","Obstetrics & Gynaecology","Psychiatry","Community Health","Medical Ethics","Forensic Medicine"],
+    science: ["Calculus","Linear Algebra","Statistics","Organic Chemistry","Inorganic Chemistry","Physical Chemistry","Classical Mechanics","Quantum Mechanics","Electromagnetism","Thermodynamics","Molecular Biology","Genetics","Cell Biology","Ecology","Environmental Science"],
+    law: ["Constitutional Law","Contract Law","Criminal Law","Tort Law","Administrative Law","Company Law","Property Law","Family Law","International Law","Human Rights Law","Evidence","Legal Research & Writing","Jurisprudence","Commercial Law","Intellectual Property Law"],
+    arts: ["Literature","Philosophy","History","Linguistics","Fine Art","Music Theory","Drama & Theatre","Cultural Studies","Religious Studies","Media Studies","Creative Writing","Art History","Classical Studies","Gender Studies","African Studies"],
+    business: ["Microeconomics","Macroeconomics","Accounting Principles","Financial Management","Marketing Management","Operations Management","Business Statistics","Organisational Behaviour","Strategic Management","Corporate Finance","International Trade","Entrepreneurship","Business Law","Supply Chain Management","Human Resource Management"],
+    education: ["Philosophy of Education","Educational Psychology","Curriculum Studies","Measurement & Evaluation","Special Education","Teaching Methods","Educational Technology","School Management","Sociology of Education","History of Education","Guidance & Counselling","Early Childhood Education","Adult Education","Comparative Education"],
+    social: ["Introduction to Sociology","Social Research Methods","Social Psychology","Political Science","International Relations","Public Administration","Development Studies","Criminology","Urban Sociology","Gender Studies","Anthropology","Social Policy","Migration Studies","Conflict Resolution"],
+    computing: ["Data Structures & Algorithms","Database Systems","Operating Systems","Computer Networks","Software Engineering","Web Development","Machine Learning","Computer Architecture","Cybersecurity","Cloud Computing","Artificial Intelligence","Mobile Development","Computer Graphics","Compiler Design","Distributed Systems"],
+    architecture: ["Architectural Design","Building Technology","History of Architecture","Urban Planning","Structural Systems","Environmental Design","Computer-Aided Design","Interior Design","Landscape Architecture","Building Services","Construction Management","Housing Design","Architectural Theory","Heritage Conservation"],
+    agriculture: ["Crop Science","Animal Science","Soil Science","Agricultural Economics","Farm Management","Plant Pathology","Agricultural Engineering","Horticulture","Food Science","Veterinary Anatomy","Animal Nutrition","Aquaculture","Agronomy","Post-Harvest Technology","Agricultural Extension"],
+    pharmacy: ["Pharmaceutical Chemistry","Pharmacology","Pharmacokinetics","Pharmaceutical Microbiology","Pharmacy Practice","Medicinal Chemistry","Biopharmaceutics","Pharmacy Management","Clinical Pharmacy","Toxicology","Natural Products","Drug Formulation","Pharmaceutical Analysis","Hospital Pharmacy"],
+    all: ["Mathematics","English Language","Physics","Chemistry","Biology","Economics","Geography","Computer Science","History","Literature","Statistics","Philosophy","Sociology","Psychology","Political Science"]
+  };
+
+  let currentSubjects = [...subjectsByFaculty.all];
+
+  function renderSubjectChips(subjects) {
+    const container = document.getElementById('subject-chips');
+    container.innerHTML = subjects.map(s => `
+      <button onclick="toggleSubject(this,'${s}')" class="subject-chip px-4 py-2 rounded-full border border-white/10 bg-[#191b22] text-sm font-medium ${selectedSubjects.has(s)?'selected':''}">
+        ${s}
+      </button>
+    `).join('');
+  }
+
+  function toggleSubject(btn, name) {
+    if (selectedSubjects.has(name)) {
+      selectedSubjects.delete(name);
+      btn.classList.remove('selected');
+    } else {
+      selectedSubjects.add(name);
+      btn.classList.add('selected');
+    }
+    renderSelectedConfig();
+  }
+
+  function renderSelectedConfig() {
+    const container = document.getElementById('selected-subjects-config');
+    if (selectedSubjects.size === 0) { container.innerHTML = ''; return; }
+    container.innerHTML = `
+      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">${selectedSubjects.size} Selected — Set Exam Details</div>
+      ${[...selectedSubjects].map(s => `
+        <div class="bg-[#191b22] border border-white/5 rounded-xl p-4 space-y-3">
+          <div class="font-semibold text-sm text-on-surface">${s}</div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-[9px] font-bold text-slate-600 uppercase tracking-widest block mb-1">Exam Date</label>
+              <input type="date" class="w-full bg-[#111319] border border-white/10 rounded-lg px-3 py-2 text-xs text-on-surface transition-all"/>
+            </div>
+            <div>
+              <label class="text-[9px] font-bold text-slate-600 uppercase tracking-widest block mb-1">Difficulty</label>
+              <div class="flex gap-1">
+                <button onclick="setDifficulty(this,'easy')" class="difficulty-btn flex-1 py-2 rounded-lg text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">Easy</button>
+                <button onclick="setDifficulty(this,'medium')" class="difficulty-btn flex-1 py-2 rounded-lg text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-all">Med</button>
+                <button onclick="setDifficulty(this,'hard')" class="difficulty-btn flex-1 py-2 rounded-lg text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all">Hard</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function setDifficulty(btn, level) {
+    const group = btn.parentElement.querySelectorAll('.difficulty-btn');
+    group.forEach(b => { b.style.opacity = '0.5'; b.style.transform = 'scale(0.95)'; });
+    btn.style.opacity = '1'; btn.style.transform = 'scale(1.05)';
+    setTimeout(() => btn.style.transform = 'scale(1)', 200);
+  }
+
+  function filterSubjects(query) {
+    const filtered = currentSubjects.filter(s => s.toLowerCase().includes(query.toLowerCase()));
+    renderSubjectChips(filtered);
+  }
+
+  function updateSubjectsByFaculty() {
+    const faculty = document.getElementById('faculty-select').value;
+    currentSubjects = faculty && subjectsByFaculty[faculty] ? subjectsByFaculty[faculty] : subjectsByFaculty.all;
+    const label = document.getElementById('faculty-label');
+    label.textContent = faculty ? faculty.charAt(0).toUpperCase() + faculty.slice(1) + ' Subjects' : 'All Subjects';
+    renderSubjectChips(currentSubjects);
+  }
+
+  function filterUnis(query) {
+    const dropdown = document.getElementById('uni-dropdown');
+    if (!query) { dropdown.classList.add('hidden'); return; }
+    const matches = universities.filter(u => u.toLowerCase().includes(query.toLowerCase()));
+    if (matches.length === 0) { dropdown.classList.add('hidden'); return; }
+    dropdown.innerHTML = matches.slice(0,8).map(u => `
+      <button onclick="selectUni('${u.replace(/'/g,"\\'")}',this)" class="w-full text-left px-4 py-3 text-sm text-on-surface-variant hover:bg-[#282a30] hover:text-on-surface transition-colors border-b border-white/5 last:border-0">${u}</button>
+    `).join('');
+    dropdown.classList.remove('hidden');
+  }
+
+  function selectUni(name) {
+    document.getElementById('university-input').value = name;
+    document.getElementById('uni-dropdown').classList.add('hidden');
+  }
+
+  function selectSemester(btn, val) {
+    document.querySelectorAll('#step-2 .pref-card').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function selectPref(btn, group, val) {
+    const parent = btn.closest('.space-y-8') || btn.closest('div');
+    btn.closest('.grid').querySelectorAll('.pref-card').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function updateProgress() {
+    const pct = (currentStep / totalSteps) * 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('step-counter').textContent = `Step ${currentStep} of ${totalSteps}`;
+    for (let i = 1; i <= totalSteps; i++) {
+      const dot = document.getElementById(`dot-${i}`).querySelector('div');
+      const label = document.getElementById(`dot-${i}`).querySelector('span');
+      if (i < currentStep) { dot.className = 'w-2 h-2 rounded-full bg-primary transition-all'; label.className = 'text-[9px] text-primary font-bold uppercase tracking-wider'; }
+      else if (i === currentStep) { dot.className = 'w-2 h-2 rounded-full bg-primary transition-all scale-150'; label.className = 'text-[9px] text-primary font-bold uppercase tracking-wider'; }
+      else { dot.className = 'w-2 h-2 rounded-full bg-white/10 transition-all'; label.className = 'text-[9px] text-slate-600 font-bold uppercase tracking-wider'; }
+    }
+  }
+
+  function showStep(n) {
+    for (let i = 1; i <= totalSteps; i++) {
+      const el = document.getElementById(`step-${i}`);
+      if (i === n) { el.classList.remove('hidden'); el.classList.add('step-enter'); setTimeout(()=>el.classList.remove('step-enter'),400); }
+      else el.classList.add('hidden');
+    }
+    document.getElementById('btn-back').classList.toggle('invisible', n === 1);
+    const nextBtn = document.getElementById('btn-next');
+    const navButtons = document.getElementById('nav-buttons');
+    if (n === totalSteps) { navButtons.classList.add('hidden'); }
+    else { navButtons.classList.remove('hidden'); nextBtn.textContent = n === totalSteps - 1 ? 'Finish →' : 'Continue →'; }
+    updateProgress();
+  }
+
+  function nextStep() {
+    if (currentStep < totalSteps) {
+      currentStep++;
+      if (currentStep === 3) renderSubjectChips(currentSubjects);
+      if (currentStep === totalSteps) populateSummary();
+      showStep(currentStep);
+    }
+  }
+
+  function prevStep() {
+    if (currentStep > 1) { currentStep--; showStep(currentStep); }
+  }
+
+  function populateSummary() {
+    const name = document.getElementById('student-name').value || 'Student';
+    const nick = document.getElementById('student-nickname').value;
+    const uni = document.getElementById('university-input').value || 'Your University';
+    document.getElementById('summary-name').textContent = nick ? `${name} (${nick})` : name;
+    document.getElementById('summary-uni').textContent = uni;
+    document.getElementById('summary-subjects').textContent = selectedSubjects.size;
+  }
+
+  function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('avatar-preview');
+        preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover"/>`;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  document.addEventListener('click', e => {
+    const dropdown = document.getElementById('uni-dropdown');
+    if (!e.target.closest('#university-input') && !e.target.closest('#uni-dropdown')) {
+      dropdown.classList.add('hidden');
+    }
+  });
+
+  renderSubjectChips(currentSubjects);
+
+  let currentUser = null;
+let activeFocusSessionId = null;
+
+async function initFocus() {
+  currentUser = await Auth.requireAuth();
+  if (!currentUser) return;
+  
+  const streak = await StreakAPI.get(currentUser.id);
+  document.getElementById('streak-badge').textContent = `${streak.current_streak} Day Streak`;
+  
+  const todayMins = await FocusAPI.getTodayMinutes(currentUser.id);
+  document.getElementById('mins-focused').textContent = Math.round(todayMins);
+}
+
+// Override startTimer to log to Supabase
+const _originalStartTimer = startTimer;
+async function startTimer() {
+  _originalStartTimer();
+  
+  if (currentUser && !activeFocusSessionId) {
+    try {
+      const focusSession = await FocusAPI.start(
+        currentUser.id, null, currentSubject, currentMode, workMins
+      );
+      activeFocusSessionId = focusSession.id;
+    } catch (e) {
+      console.warn('Could not log focus session:', e);
+    }
+  }
+}
+
+// Override phaseComplete to log completion
+const _originalPhaseComplete = phaseComplete;
+async function phaseComplete() {
+  _originalPhaseComplete();
+  
+  if (!isBreak && activeFocusSessionId && currentUser) {
+    try {
+      await FocusAPI.end(activeFocusSessionId, workMins, true);
+      activeFocusSessionId = null;
+    } catch (e) {
+      console.warn('Could not complete focus session:', e);
+    }
+  }
+}
+
+initFocus();
+
+
+async function completeOnboarding() {
+  const user = await Auth.getUser();
+  if (!user) return;
+  
+  try {
+    // Save profile data
+    await ProfileAPI.completeOnboarding(user.id, {
+      full_name: document.getElementById('student-name').value,
+      nickname: document.getElementById('student-nickname').value,
+      university: document.getElementById('university-input').value,
+      faculty: document.getElementById('faculty-select').value,
+      // ... preferences from step 4
+    });
+    
+    // Save subjects
+    for (const subjectName of selectedSubjects) {
+      await SubjectsAPI.create(user.id, {
+        name: subjectName,
+        difficulty: 'medium', // from per-subject config
+      });
+    }
+    
+    // Generate initial schedule
+    await SchedulerAPI.generate(user.id);
+    
+    window.location.href = 'dashboard.html';
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+} // ✅ Added closing brace for the function
+
+</script>  <script src="js/supabase-client.js"></script>
+</body>
+</html>

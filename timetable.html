@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Itachi Study Buddy - Timetable</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = { darkMode:"class", theme:{ extend:{ colors:{
+    "background":"#111319","surface-container-low":"#191b22","surface-container-high":"#282a30",
+    "surface-container-highest":"#33343b","primary":"#c4c0ff","primary-container":"#8781ff",
+    "on-primary":"#2000a4","on-surface":"#e2e2eb","on-surface-variant":"#c7c4d8",
+    "outline-variant":"#464555","tertiary":"#ffb785","error":"#ffb4ab",
+    "surface-container-lowest":"#0c0e14","secondary":"#c4c0ff","error-container":"#93000a"
+  }}}}
+</script>
+<style>
+  *{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes checkPop{0%{transform:scale(1);}40%{transform:scale(1.3);}100%{transform:scale(1);}}
+  @keyframes strikeThrough{from{width:0;}to{width:100%;}}
+  .fade-up{animation:fadeUp 0.45s ease forwards;}
+  .nav-link{transition:all 0.2s;}
+  .nav-link:hover{background:rgba(255,255,255,0.05);}
+  .session-item{transition:all 0.3s;cursor:pointer;}
+  .session-item:hover{background:rgba(255,255,255,0.03);}
+  .session-item.completed{opacity:0.5;}
+  .check-btn{transition:all 0.2s;}
+  .check-btn:hover{transform:scale(1.1);}
+  .check-btn.checked{animation:checkPop 0.3s ease;}
+  .date-btn{transition:all 0.2s;}
+  .date-btn.active{background:linear-gradient(135deg,#c4c0ff,#8781ff);color:#111319;}
+  .date-btn:not(.active):hover{background:rgba(255,255,255,0.06);}
+  .add-btn{background:linear-gradient(135deg,#c4c0ff,#8781ff);transition:all 0.2s;}
+  .add-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(135,129,255,0.3);}
+  .add-btn:active{transform:scale(0.97);}
+  input:focus,select:focus{outline:none;border-color:#c4c0ff!important;box-shadow:0 0 0 2px rgba(196,192,255,0.12);}
+</style>
+</head>
+<body class="bg-[#111319] text-[#e2e2eb] min-h-screen">
+
+<!-- Add Session Modal -->
+<div id="add-modal" class="hidden fixed inset-0 z-[100] flex items-end md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="bg-[#191b22] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="font-black text-lg tracking-tight">Add Study Session</h3>
+      <button onclick="document.getElementById('add-modal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-slate-400 text-lg">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Subject</label><select id="modal-subject" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"><option>Quantum Mechanics</option><option>Linear Algebra</option><option>Philosophy of Science</option><option>Free Study</option></select></div>
+      <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Topic / Notes</label><input type="text" id="modal-topic" placeholder="e.g. Eigenvalues" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-slate-600 transition-all"/></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Start Time</label><input type="time" id="modal-time" value="09:00" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all"/></div>
+        <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Duration</label><select id="modal-dur" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface"><option>30 min</option><option selected>45 min</option><option>60 min</option><option>90 min</option><option>120 min</option></select></div>
+      </div>
+      <div>
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-3">Color Tag</label>
+        <div class="flex gap-2" id="color-picker">
+          <div onclick="selectColor(this,'#c4c0ff')" class="w-7 h-7 rounded-full cursor-pointer border-2 border-white ring-1 ring-white/0 hover:ring-white/30 transition-all" style="background:#c4c0ff"></div>
+          <div onclick="selectColor(this,'#ffb785')" class="w-7 h-7 rounded-full cursor-pointer border-2 border-transparent ring-1 ring-white/0 hover:ring-white/30 transition-all" style="background:#ffb785"></div>
+          <div onclick="selectColor(this,'#34d399')" class="w-7 h-7 rounded-full cursor-pointer border-2 border-transparent ring-1 ring-white/0 hover:ring-white/30 transition-all" style="background:#34d399"></div>
+          <div onclick="selectColor(this,'#60a5fa')" class="w-7 h-7 rounded-full cursor-pointer border-2 border-transparent ring-1 ring-white/0 hover:ring-white/30 transition-all" style="background:#60a5fa"></div>
+          <div onclick="selectColor(this,'#f87171')" class="w-7 h-7 rounded-full cursor-pointer border-2 border-transparent ring-1 ring-white/0 hover:ring-white/30 transition-all" style="background:#f87171"></div>
+        </div>
+      </div>
+      <button onclick="addSession()" class="add-btn w-full py-3 rounded-xl text-sm font-black uppercase tracking-widest text-[#111319] mt-2">
+        Add to Schedule
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="hidden md:flex flex-col p-6 gap-4 bg-[#191B22] h-full w-72 fixed left-0 top-0 z-[60] shadow-2xl">
+  <div class="mb-8"><span class="text-xs font-bold text-slate-500 tracking-[0.05em] uppercase">MONASTIC WORKSPACE</span></div>
+  <nav class="flex flex-col gap-1">
+    <a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="subjects.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">menu_book</span>Subjects</a>
+    <a href="timetable.html" class="flex items-center gap-3 px-4 py-3 bg-[#282A30] text-[#C4C0FF] rounded-md font-bold text-sm"><span class="material-symbols-outlined">calendar_today</span>Timetable</a>
+    <a href="focus.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">timer</span>Focus Mode</a>
+    <a href="progress.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">insights</span>Progress</a>
+    <a href="settings.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+</aside>
+
+<div class="md:ml-72 min-h-screen flex flex-col">
+  <header class="flex justify-between items-center px-6 h-16 bg-[#111319] border-b border-white/5 sticky top-0 z-50">
+    <div class="flex items-center gap-4">
+      <a href="dashboard.html" class="md:hidden text-[#C4C0FF]"><span class="material-symbols-outlined">arrow_back</span></a>
+      <h1 class="font-bold text-lg uppercase text-[#C4C0FF] tracking-tight">Timetable</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="document.getElementById('add-modal').classList.remove('hidden')" class="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary-container text-[#111319] rounded-lg text-xs font-black uppercase tracking-widest hover:opacity-90 transition-all active:scale-95">
+        <span class="material-symbols-outlined text-[18px]">add</span>Add Session
+      </button>
+      <button onclick="toggleDark()" class="text-[#C4C0FF] hover:bg-[#282A30] p-2 rounded-full transition-colors"><span class="material-symbols-outlined">dark_mode</span></button>
+    </div>
+  </header>
+
+  <main class="flex-1 px-6 md:px-10 py-8 max-w-3xl mx-auto w-full pb-32 md:pb-10 space-y-8">
+
+    <!-- Week navigation -->
+    <div class="fade-up">
+      <div class="flex items-center justify-between mb-4">
+        <button onclick="prevWeek()" class="w-9 h-9 rounded-full bg-[#191b22] border border-white/10 flex items-center justify-center text-slate-400 hover:text-on-surface hover:border-white/20 transition-all active:scale-90">
+          <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+        </button>
+        <div class="text-center">
+          <div id="week-label" class="text-sm font-black text-on-surface uppercase tracking-widest"></div>
+          <div id="month-label" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5"></div>
+        </div>
+        <button onclick="nextWeek()" class="w-9 h-9 rounded-full bg-[#191b22] border border-white/10 flex items-center justify-center text-slate-400 hover:text-on-surface hover:border-white/20 transition-all active:scale-90">
+          <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+        </button>
+      </div>
+      <!-- Day pills -->
+      <div class="grid grid-cols-7 gap-1.5" id="day-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Today's Protocol -->
+    <div class="fade-up" style="animation-delay:0.1s;opacity:0">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Protocol</div>
+          <h2 id="selected-date-label" class="text-2xl font-black tracking-tight text-on-surface">Today's Plan</h2>
+        </div>
+        <div id="completion-badge" class="px-3 py-1.5 bg-[#191b22] border border-white/5 rounded-full text-[11px] font-bold text-slate-400">
+          0 / 0 done
+        </div>
+      </div>
+
+      <div id="sessions-container" class="space-y-3">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="hidden text-center py-16 space-y-3">
+        <span class="material-symbols-outlined text-4xl text-slate-700">event_available</span>
+        <div class="text-slate-500 text-sm font-medium">No sessions scheduled for this day.</div>
+        <button onclick="document.getElementById('add-modal').classList.remove('hidden')" class="text-primary text-xs font-bold hover:underline">+ Add a session</button>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="fade-up grid grid-cols-3 gap-4" style="animation-delay:0.2s;opacity:0">
+      <div class="bg-[#191b22] border border-white/5 rounded-xl p-4 text-center">
+        <div id="stat-efficiency" class="text-2xl font-black text-primary">84%</div>
+        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Efficiency</div>
+      </div>
+      <div class="bg-[#191b22] border border-white/5 rounded-xl p-4 text-center">
+        <div id="stat-budget" class="text-2xl font-black text-on-surface">3.5h</div>
+        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Time Budget</div>
+      </div>
+      <div class="bg-[#191b22] border border-white/5 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-tertiary">12</div>
+        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Focus Streak</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Mobile Bottom Nav -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-[#111319]/90 backdrop-blur-md border-t border-white/5 flex justify-around items-center h-16 px-4">
+  <a href="dashboard.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">home</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Home</span></a>
+  <a href="subjects.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">menu_book</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Subjects</span></a>
+  <a href="focus.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">timer</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Focus</span></a>
+  <a href="progress.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">bar_chart</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Stats</span></a>
+  <a href="settings.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">settings</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Settings</span></a>
+</nav>
+
+<!-- FAB -->
+<button onclick="document.getElementById('add-modal').classList.remove('hidden')" class="md:hidden fixed bottom-20 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary-container shadow-2xl flex items-center justify-center z-40 active:scale-90 transition-transform">
+  <span class="material-symbols-outlined text-2xl text-[#111319]">add</span>
+</button>
+
+<script>
+  const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let currentWeekOffset = 0;
+  let selectedDayIndex = new Date().getDay();
+  let selectedColor = '#c4c0ff';
+
+  // Session data per day-of-week
+  const sessions = {
+    0: [], // Sun
+    1: [
+      { id:1, subject:'Linear Algebra', topic:'Eigenvalues & Eigenvectors', time:'09:00', dur:'90 min', color:'#c4c0ff', done:false },
+      { id:2, subject:'Quantum Mechanics', topic:'Wave-Particle Duality', time:'14:00', dur:'60 min', color:'#f87171', done:false },
+    ],
+    2: [
+      { id:3, subject:'Philosophy of Science', topic:'Popper & Falsificationism', time:'10:00', dur:'45 min', color:'#34d399', done:false },
+      { id:4, subject:'Linear Algebra', topic:'Matrix Decomposition', time:'16:00', dur:'90 min', color:'#c4c0ff', done:false },
+    ],
+    3: [ // Today's sessions (Wed)
+      { id:5, subject:'Computer Architecture', topic:'Pipelining & Hazards', time:'08:00', dur:'45 min', color:'#60a5fa', done:true },
+      { id:6, subject:'Linear Algebra', topic:'Eigenvalues & Eigenvectors', time:'10:00', dur:'90 min', color:'#c4c0ff', done:false },
+      { id:7, subject:'Quantum Mechanics', topic:'Schrödinger Equation', time:'14:30', dur:'60 min', color:'#f87171', done:false },
+      { id:8, topic:'☕ Break', subject:'Rest', time:'13:30', dur:'30 min', color:'#464555', done:false, isBreak:true },
+    ],
+    4: [
+      { id:9, subject:'Quantum Mechanics', topic:'Uncertainty Principle', time:'09:00', dur:'90 min', color:'#f87171', done:false },
+    ],
+    5: [
+      { id:10, subject:'Philosophy of Science', topic:'Thomas Kuhn & Paradigms', time:'11:00', dur:'60 min', color:'#34d399', done:false },
+      { id:11, subject:'Linear Algebra', topic:'Inner Product Spaces', time:'15:00', dur:'45 min', color:'#c4c0ff', done:false },
+    ],
+    6: [],
+  };
+
+  let nextId = 20;
+
+  function getWeekStart(offset) {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day;
+    const weekStart = new Date(now.setDate(diff + (offset * 7)));
+    return weekStart;
+  }
+
+  function renderWeek() {
+    const weekStart = getWeekStart(currentWeekOffset);
+    const grid = document.getElementById('day-grid');
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      days.push(d);
+    }
+
+    document.getElementById('week-label').textContent = currentWeekOffset === 0 ? 'This Week' : currentWeekOffset === -1 ? 'Last Week' : currentWeekOffset === 1 ? 'Next Week' : `Week ${currentWeekOffset > 0 ? '+' : ''}${currentWeekOffset}`;
+    document.getElementById('month-label').textContent = `${MONTHS[days[0].getMonth()]} ${days[0].getFullYear()}`;
+
+    grid.innerHTML = days.map((d,i) => {
+      const isToday = d.getTime() === today.getTime() && currentWeekOffset === 0;
+      const isSelected = i === selectedDayIndex;
+      const hasSessions = sessions[i] && sessions[i].length > 0;
+      return `
+        <button onclick="selectDay(${i})" class="date-btn flex flex-col items-center py-2.5 px-1 rounded-xl ${isSelected ? 'active' : 'bg-[#191b22] border border-white/5'} transition-all">
+          <span class="text-[9px] font-bold uppercase tracking-wider ${isSelected ? 'text-[#111319]' : 'text-slate-500'}">${DAY_NAMES[i]}</span>
+          <span class="text-base font-black mt-1 ${isSelected ? 'text-[#111319]' : isToday ? 'text-primary' : 'text-on-surface'}">${d.getDate()}</span>
+          ${hasSessions ? `<div class="w-1 h-1 rounded-full mt-1 ${isSelected ? 'bg-[#111319]/60' : 'bg-primary/60'}"></div>` : '<div class="w-1 h-1 mt-1"></div>'}
+        </button>
+      `;
+    }).join('');
+  }
+
+  function selectDay(idx) {
+    selectedDayIndex = idx;
+    renderWeek();
+    renderSessions();
+    updateSelectedLabel();
+  }
+
+  function updateSelectedLabel() {
+    const weekStart = getWeekStart(currentWeekOffset);
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + selectedDayIndex);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const isToday = d.getTime() === today.getTime() && currentWeekOffset === 0;
+    const label = isToday ? "Today's Protocol" : `${DAY_NAMES[selectedDayIndex]}, ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+    document.getElementById('selected-date-label').textContent = label;
+  }
+
+  function renderSessions() {
+    const container = document.getElementById('sessions-container');
+    const empty = document.getElementById('empty-state');
+    const daySessions = (sessions[selectedDayIndex] || []).sort((a,b) => a.time.localeCompare(b.time));
+
+    if (!daySessions.length) {
+      container.innerHTML = '';
+      empty.classList.remove('hidden');
+      document.getElementById('completion-badge').textContent = '0 / 0 done';
+      return;
+    }
+    empty.classList.add('hidden');
+
+    const done = daySessions.filter(s => s.done).length;
+    document.getElementById('completion-badge').textContent = `${done} / ${daySessions.length} done`;
+
+    container.innerHTML = daySessions.map(s => `
+      <div id="session-${s.id}" class="session-item ${s.done ? 'completed' : ''} bg-[#191b22] border border-white/5 rounded-xl flex items-center gap-4 p-4 group hover:border-white/10 transition-all ${s.isBreak ? 'opacity-60' : ''}">
+        <div class="w-1 self-stretch rounded-full flex-shrink-0" style="background:${s.color}"></div>
+        <div class="w-10 h-10 rounded-lg bg-[#111319] flex flex-col items-center justify-center flex-shrink-0">
+          <span class="text-[10px] font-black text-on-surface leading-none">${s.time}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-bold text-sm text-on-surface ${s.done ? 'line-through text-slate-500' : ''}">${s.subject}</div>
+          <div class="text-[11px] text-slate-500 truncate">${s.topic} · ${s.dur}</div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          ${!s.isBreak ? `<a href="focus.html" class="text-slate-600 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"><span class="material-symbols-outlined text-[18px]">play_arrow</span></a>` : ''}
+          <button onclick="toggleSession(${s.id})" class="check-btn w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${s.done ? 'bg-primary border-primary' : 'border-white/20 hover:border-primary'} ${s.isBreak ? 'hidden' : ''}">
+            ${s.done ? '<span class="material-symbols-outlined text-[14px] text-[#111319]" style="font-variation-settings:\'FILL\' 1">check</span>' : ''}
+          </button>
+          <button onclick="removeSession(${s.id})" class="text-slate-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 ml-1">
+            <span class="material-symbols-outlined text-[16px]">close</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function toggleSession(id) {
+    const daySessions = sessions[selectedDayIndex] || [];
+    const s = daySessions.find(x => x.id === id);
+    if (!s) return;
+    s.done = !s.done;
+    renderSessions();
+    // Micro animation
+    const el = document.getElementById(`session-${id}`);
+    if (el) { el.style.transform='scale(0.98)'; setTimeout(()=>el.style.transform='',200); }
+  }
+
+  function removeSession(id) {
+    if (!sessions[selectedDayIndex]) return;
+    sessions[selectedDayIndex] = sessions[selectedDayIndex].filter(s => s.id !== id);
+    renderSessions();
+  }
+
+  function addSession() {
+    const subject = document.getElementById('modal-subject').value;
+    const topic = document.getElementById('modal-topic').value || 'Study Session';
+    const time = document.getElementById('modal-time').value;
+    const dur = document.getElementById('modal-dur').value;
+    if (!sessions[selectedDayIndex]) sessions[selectedDayIndex] = [];
+    sessions[selectedDayIndex].push({ id: nextId++, subject, topic, time, dur, color: selectedColor, done: false });
+    document.getElementById('add-modal').classList.add('hidden');
+    document.getElementById('modal-topic').value = '';
+    renderSessions();
+    renderWeek();
+  }
+
+  function selectColor(el, color) {
+    selectedColor = color;
+    document.querySelectorAll('#color-picker div').forEach(d => d.style.borderColor = 'transparent');
+    el.style.borderColor = 'white';
+  }
+
+  function prevWeek() { currentWeekOffset--; renderWeek(); updateSelectedLabel(); }
+  function nextWeek() { currentWeekOffset++; renderWeek(); updateSelectedLabel(); }
+  function toggleDark() { document.documentElement.classList.toggle('dark'); }
+
+  // Init
+  renderWeek();
+  renderSessions();
+  updateSelectedLabel();
+
+  // Fade up animations
+  document.querySelectorAll('.fade-up').forEach((el, i) => {
+    setTimeout(() => el.style.opacity = '1', 80 + i * 80);
+  });
+  let currentUser = null;
+let weekSessions = {};
+
+async function initTimetable() {
+  currentUser = await Auth.requireAuth();
+  if (!currentUser) return;
+  
+  await loadWeek();
+}
+
+async function loadWeek() {
+  const weekStart = getWeekStart(currentWeekOffset);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  
+  const sessions = await SessionsAPI.getByWeek(
+    currentUser.id,
+    weekStart.toISOString().split('T')[0],
+    weekEnd.toISOString().split('T')[0]
+  );
+  
+  // Group by day-of-week
+  weekSessions = {};
+  sessions.forEach(s => {
+    const day = new Date(s.scheduled_date).getDay();
+    if (!weekSessions[day]) weekSessions[day] = [];
+    weekSessions[day].push({
+      id: s.id,
+      subject: s.subject_name || s.subjects?.name,
+      topic: s.topic,
+      time: s.start_time?.slice(0,5),
+      dur: `${s.duration_mins} min`,
+      color: s.color || s.subjects?.color || '#c4c0ff',
+      done: s.status === 'completed',
+    });
+  });
+  
+  renderWeek();
+  renderSessions();
+}
+
+// Override toggleSession to call real API
+async function toggleSession(id) {
+  const daySessions = weekSessions[selectedDayIndex] || [];
+  const s = daySessions.find(x => x.id === id);
+  if (!s) return;
+  
+  try {
+    if (!s.done) {
+      await SessionsAPI.complete(id, s.dur.replace(' min','') * 1);
+      s.done = true;
+      showToast('Session completed! 🎉');
+    } else {
+      // Un-complete: just update status back to scheduled
+      await window._supabase.from('study_sessions').update({ status: 'scheduled' }).eq('id', id);
+      s.done = false;
+    }
+    renderSessions();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+initTimetable();
+
+</script>
+  <script src="js/supabase-client.js"></script>
+</body>
+</html>

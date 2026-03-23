@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Itachi Study Buddy — Focus Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = { darkMode:"class", theme:{ extend:{ colors:{
+    "background":"#111319","surface-container-low":"#191b22","surface-container-high":"#282a30",
+    "surface-container-highest":"#33343b","primary":"#c4c0ff","primary-container":"#8781ff",
+    "on-primary":"#2000a4","on-surface":"#e2e2eb","on-surface-variant":"#c7c4d8",
+    "outline-variant":"#464555","tertiary":"#ffb785","error":"#ffb4ab",
+    "surface-container-lowest":"#0c0e14"
+  }}}}
+</script>
+<style>
+  *{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes pulse-ring{0%{transform:scale(1);opacity:0.4;}50%{transform:scale(1.08);opacity:0.1;}100%{transform:scale(1);opacity:0.4;}}
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes tickPop{0%{transform:scale(1);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
+  @keyframes lockIn{from{opacity:0;backdrop-filter:blur(0px);}to{opacity:1;backdrop-filter:blur(8px);}}
+  .fade-in{animation:fadeIn 0.5s ease forwards;}
+  .pulse-ring{animation:pulse-ring 3s ease-in-out infinite;}
+  .tick-pop{animation:tickPop 0.1s ease;}
+  #focus-overlay{animation:lockIn 0.4s ease forwards;}
+  .nav-link{transition:all 0.2s;}
+  .nav-link:hover{background:rgba(255,255,255,0.05);}
+  .mode-btn{transition:all 0.2s;cursor:pointer;}
+  .mode-btn.active{background:rgba(196,192,255,0.12);color:#c4c0ff;border-color:rgba(196,192,255,0.3);}
+  .mode-btn:not(.active):hover{background:rgba(255,255,255,0.05);}
+  .subject-select-item{transition:all 0.2s;cursor:pointer;}
+  .subject-select-item.selected{background:rgba(196,192,255,0.1);border-color:rgba(196,192,255,0.4);}
+  .subject-select-item:hover:not(.selected){background:rgba(255,255,255,0.04);}
+  body.focus-locked aside,body.focus-locked .bottom-nav{pointer-events:none;opacity:0.2;filter:blur(2px);}
+  .btn-primary{background:linear-gradient(135deg,#c4c0ff,#8781ff);transition:all 0.2s;}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(135,129,255,0.3);}
+  .btn-primary:active{transform:scale(0.97);}
+  .session-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.1);transition:all 0.3s;}
+  .session-dot.done{background:#c4c0ff;}
+  .session-dot.current{background:#c4c0ff;box-shadow:0 0 8px rgba(196,192,255,0.6);}
+</style>
+</head>
+<body class="bg-[#111319] text-[#e2e2eb] min-h-screen" id="body">
+
+<!-- Sidebar -->
+<aside class="hidden md:flex flex-col p-6 gap-4 bg-[#191B22] h-full w-72 fixed left-0 top-0 z-[60] shadow-2xl">
+  <div class="mb-8"><span class="text-xs font-bold text-slate-500 tracking-[0.05em] uppercase">MONASTIC WORKSPACE</span></div>
+  <nav class="flex flex-col gap-1">
+    <a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="subjects.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">menu_book</span>Subjects</a>
+    <a href="timetable.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">calendar_today</span>Timetable</a>
+    <a href="focus.html" class="flex items-center gap-3 px-4 py-3 bg-[#282A30] text-[#C4C0FF] rounded-md font-bold text-sm"><span class="material-symbols-outlined">timer</span>Focus Mode</a>
+    <a href="progress.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">insights</span>Progress</a>
+    <a href="settings.html" class="nav-link flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+</aside>
+
+<div class="md:ml-72 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="flex justify-between items-center px-6 h-16 bg-[#111319] border-b border-white/5 sticky top-0 z-50">
+    <div class="flex items-center gap-4">
+      <a href="dashboard.html" class="md:hidden text-[#C4C0FF]"><span class="material-symbols-outlined">arrow_back</span></a>
+      <h1 class="font-bold text-lg uppercase text-[#C4C0FF] tracking-tight">Focus Mode</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="streak-badge" class="hidden md:flex items-center gap-1 px-3 py-1.5 bg-[#191b22] rounded-full text-xs font-bold text-tertiary border border-white/5">
+        <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">local_fire_department</span>12 Day Streak
+      </span>
+      <button onclick="toggleDark()" class="text-[#C4C0FF] hover:bg-[#282A30] p-2 rounded-full transition-colors"><span class="material-symbols-outlined">dark_mode</span></button>
+    </div>
+  </header>
+
+  <main class="flex-1 px-6 md:px-12 py-8 max-w-4xl mx-auto w-full space-y-8 pb-24 md:pb-8">
+
+    <!-- Subject selector -->
+    <div class="fade-in" style="animation-delay:0.05s;opacity:0">
+      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Studying Now</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="subject-selector">
+        <div onclick="selectSubject(this,'Linear Algebra')" class="subject-select-item selected p-3 rounded-xl bg-[#191b22] border border-white/10">
+          <div class="w-2 h-2 rounded-full bg-primary mb-2"></div>
+          <div class="text-sm font-bold text-on-surface">Linear Algebra</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Exam in 12 days</div>
+        </div>
+        <div onclick="selectSubject(this,'Quantum Mechanics')" class="subject-select-item p-3 rounded-xl bg-[#191b22] border border-white/10">
+          <div class="w-2 h-2 rounded-full bg-error mb-2"></div>
+          <div class="text-sm font-bold text-on-surface">Quantum Mech.</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Exam in 3 days</div>
+        </div>
+        <div onclick="selectSubject(this,'Philosophy')" class="subject-select-item p-3 rounded-xl bg-[#191b22] border border-white/10">
+          <div class="w-2 h-2 rounded-full bg-tertiary mb-2"></div>
+          <div class="text-sm font-bold text-on-surface">Philosophy</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Exam in 32 days</div>
+        </div>
+        <div onclick="selectSubject(this,'Free Study')" class="subject-select-item p-3 rounded-xl bg-[#191b22] border border-white/10">
+          <div class="w-2 h-2 rounded-full bg-slate-500 mb-2"></div>
+          <div class="text-sm font-bold text-on-surface">Free Study</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">No exam linked</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode selector -->
+    <div class="fade-in" style="animation-delay:0.1s;opacity:0">
+      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Timer Mode</div>
+      <div class="flex gap-3 flex-wrap">
+        <button onclick="setMode('pomodoro',25,5)" class="mode-btn active px-5 py-2.5 rounded-full border border-white/10 text-sm font-bold">⏱ Pomodoro</button>
+        <button onclick="setMode('short',15,3)" class="mode-btn px-5 py-2.5 rounded-full border border-white/10 text-sm font-bold text-slate-400">⚡ Sprint</button>
+        <button onclick="setMode('deep',90,20)" class="mode-btn px-5 py-2.5 rounded-full border border-white/10 text-sm font-bold text-slate-400">🔥 Deep Work</button>
+        <button onclick="setMode('custom',0,0)" class="mode-btn px-5 py-2.5 rounded-full border border-white/10 text-sm font-bold text-slate-400">🎛 Custom</button>
+      </div>
+    </div>
+
+    <!-- Custom timer inputs (hidden by default) -->
+    <div id="custom-inputs" class="hidden fade-in">
+      <div class="grid grid-cols-2 gap-4 bg-[#191b22] p-4 rounded-xl border border-white/5">
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Work Duration (min)</label>
+          <input type="number" id="custom-work" value="25" min="1" max="120" oninput="applyCustom()" class="w-full bg-[#111319] border border-white/10 rounded-lg px-3 py-2 text-sm text-on-surface"/>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Break Duration (min)</label>
+          <input type="number" id="custom-break" value="5" min="1" max="60" oninput="applyCustom()" class="w-full bg-[#111319] border border-white/10 rounded-lg px-3 py-2 text-sm text-on-surface"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Timer -->
+    <div class="fade-in flex flex-col items-center" style="animation-delay:0.15s;opacity:0">
+      <div class="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
+        <!-- Pulse ring -->
+        <div id="pulse-ring" class="absolute inset-0 rounded-full border-2 border-primary/20 pulse-ring hidden"></div>
+        <!-- SVG ring -->
+        <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4"/>
+          <circle id="timer-ring" cx="50" cy="50" r="44" fill="none" stroke="url(#timerGrad)" stroke-width="4" stroke-linecap="round"
+            stroke-dasharray="276.46" stroke-dashoffset="0" style="transition:stroke-dashoffset 1s linear;"/>
+          <defs>
+            <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#c4c0ff"/>
+              <stop offset="100%" stop-color="#8781ff"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <!-- Inner -->
+        <div class="relative flex flex-col items-center">
+          <div id="session-phase" class="text-[10px] font-bold text-primary uppercase tracking-widest mb-2">Focus Session</div>
+          <div id="timer-display" class="text-6xl md:text-7xl font-black tracking-tighter text-on-surface tabular-nums">25:00</div>
+          <div id="current-subject-label" class="text-sm text-slate-500 mt-2 font-medium">Linear Algebra</div>
+        </div>
+      </div>
+
+      <!-- Session dots -->
+      <div class="flex gap-2 mt-4" id="session-dots">
+        <div class="session-dot current"></div>
+        <div class="session-dot"></div>
+        <div class="session-dot"></div>
+        <div class="session-dot"></div>
+      </div>
+      <div class="text-[10px] text-slate-600 uppercase tracking-widest mt-2">Session 1 of 4</div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-4 mt-8">
+        <button onclick="resetTimer()" class="w-12 h-12 rounded-full bg-[#191b22] border border-white/10 flex items-center justify-center text-slate-400 hover:text-on-surface hover:border-white/20 transition-all">
+          <span class="material-symbols-outlined">replay</span>
+        </button>
+        <button onclick="toggleTimer()" id="play-btn" class="btn-primary w-16 h-16 rounded-full flex items-center justify-center shadow-2xl shadow-primary/20">
+          <span class="material-symbols-outlined text-2xl text-[#111319]" id="play-icon" style="font-variation-settings:'FILL' 1">play_arrow</span>
+        </button>
+        <button onclick="skipPhase()" class="w-12 h-12 rounded-full bg-[#191b22] border border-white/10 flex items-center justify-center text-slate-400 hover:text-on-surface hover:border-white/20 transition-all">
+          <span class="material-symbols-outlined">skip_next</span>
+        </button>
+      </div>
+
+      <!-- Lock UI button -->
+      <button onclick="toggleFocusLock()" id="lock-btn" class="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#191b22] border border-white/10 text-sm font-bold text-slate-400 hover:text-on-surface hover:border-white/20 transition-all">
+        <span class="material-symbols-outlined text-[18px]" id="lock-icon">lock_open</span>
+        <span id="lock-label">Lock UI</span>
+      </button>
+    </div>
+
+    <!-- Today's Stats -->
+    <div class="fade-in grid grid-cols-3 gap-4" style="animation-delay:0.2s;opacity:0">
+      <div class="bg-[#191b22] border border-white/5 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-on-surface" id="sessions-done">0</div>
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Sessions Done</div>
+      </div>
+      <div class="bg-[#191b22] border border-white/5 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-tertiary" id="mins-focused">0</div>
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Mins Focused</div>
+      </div>
+      <div class="bg-[#191b22] border border-white/5 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-primary">12</div>
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Day Streak</div>
+      </div>
+    </div>
+
+    <!-- Recent sessions log -->
+    <div class="fade-in" style="animation-delay:0.25s;opacity:0">
+      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Today's Log</div>
+      <div class="space-y-2" id="session-log">
+        <div class="text-sm text-slate-600 text-center py-4">No sessions yet. Start the timer to begin.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Focus Lock Overlay -->
+<div id="focus-overlay" class="hidden fixed inset-0 z-[200] bg-[#111319]/95 backdrop-blur-sm flex flex-col items-center justify-center">
+  <div class="text-center space-y-6">
+    <span class="material-symbols-outlined text-5xl text-primary" style="font-variation-settings:'FILL' 1">lock</span>
+    <div>
+      <div class="text-3xl font-black tracking-tighter text-on-surface" id="overlay-timer">25:00</div>
+      <div class="text-slate-500 text-sm mt-1" id="overlay-subject">Linear Algebra • Focus Session</div>
+    </div>
+    <div class="flex items-center gap-4">
+      <button onclick="toggleTimer()" class="btn-primary w-14 h-14 rounded-full flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl text-[#111319]" id="overlay-icon" style="font-variation-settings:'FILL' 1">play_arrow</span>
+      </button>
+    </div>
+    <button onclick="toggleFocusLock()" class="text-xs text-slate-600 hover:text-slate-400 transition-colors uppercase tracking-widest font-bold">
+      Exit Focus Mode
+    </button>
+  </div>
+</div>
+
+<!-- Mobile Bottom Nav -->
+<nav class="md:hidden bottom-nav fixed bottom-0 w-full z-50 bg-[#111319]/90 backdrop-blur-md border-t border-white/5 flex justify-around items-center h-16 px-4">
+  <a href="dashboard.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">home</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Home</span></a>
+  <a href="subjects.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">menu_book</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Subjects</span></a>
+  <a href="focus.html" class="flex flex-col items-center text-[#C4C0FF]"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">timer</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Focus</span></a>
+  <a href="progress.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">bar_chart</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Stats</span></a>
+  <a href="settings.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">settings</span><span class="text-[9px] uppercase tracking-wider mt-0.5">Settings</span></a>
+</nav>
+
+<script>
+  // Timer state
+  let workMins = 25, breakMins = 5;
+  let totalSeconds = workMins * 60;
+  let remaining = totalSeconds;
+  let running = false;
+  let interval = null;
+  let isBreak = false;
+  let sessionCount = 0;
+  let totalSessions = 4;
+  let completedSessions = 0;
+  let minsFocused = 0;
+  let currentSubject = 'Linear Algebra';
+  let focusLocked = false;
+  const sessionLog = [];
+
+  function formatTime(s) {
+    const m = Math.floor(s/60).toString().padStart(2,'0');
+    const sec = (s%60).toString().padStart(2,'0');
+    return `${m}:${sec}`;
+  }
+
+  function updateDisplay() {
+    const t = formatTime(remaining);
+    document.getElementById('timer-display').textContent = t;
+    document.getElementById('overlay-timer').textContent = t;
+    // Ring
+    const pct = remaining / totalSeconds;
+    const circ = 276.46;
+    document.getElementById('timer-ring').setAttribute('stroke-dashoffset', circ * (1 - pct));
+    // Ring color during break
+    document.getElementById('timer-ring').setAttribute('stroke', isBreak ? '#ffb785' : 'url(#timerGrad)');
+  }
+
+  function toggleTimer() {
+    if (running) { pauseTimer(); } else { startTimer(); }
+  }
+
+  function startTimer() {
+    running = true;
+    document.getElementById('play-icon').textContent = 'pause';
+    document.getElementById('overlay-icon').textContent = 'pause';
+    document.getElementById('pulse-ring').classList.remove('hidden');
+    interval = setInterval(() => {
+      remaining--;
+      if (!isBreak) minsFocused = Math.floor((totalSeconds - remaining) / 60);
+      document.getElementById('mins-focused').textContent = minsFocused + totalSessions * workMins * (completedSessions > 0 ? 1 : 0);
+      updateDisplay();
+      if (remaining <= 0) { phaseComplete(); }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    running = false;
+    clearInterval(interval);
+    document.getElementById('play-icon').textContent = 'play_arrow';
+    document.getElementById('overlay-icon').textContent = 'play_arrow';
+    document.getElementById('pulse-ring').classList.add('hidden');
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    isBreak = false;
+    remaining = workMins * 60;
+    totalSeconds = remaining;
+    updateDisplay();
+    document.getElementById('session-phase').textContent = 'Focus Session';
+    document.getElementById('session-phase').className = 'text-[10px] font-bold text-primary uppercase tracking-widest mb-2';
+  }
+
+  function skipPhase() { phaseComplete(); }
+
+  function phaseComplete() {
+    pauseTimer();
+    if (!isBreak) {
+      completedSessions++;
+      sessionsDone(completedSessions);
+      addLog(currentSubject, workMins + ' min focus session');
+      if (completedSessions >= totalSessions) { allDone(); return; }
+      // Switch to break
+      isBreak = true;
+      remaining = breakMins * 60;
+      totalSeconds = remaining;
+      document.getElementById('session-phase').textContent = 'Break Time';
+      document.getElementById('session-phase').className = 'text-[10px] font-bold text-tertiary uppercase tracking-widest mb-2';
+      if (focusLocked) document.getElementById('overlay-subject').textContent = currentSubject + ' • Break Time';
+    } else {
+      isBreak = false;
+      remaining = workMins * 60;
+      totalSeconds = remaining;
+      document.getElementById('session-phase').textContent = 'Focus Session';
+      document.getElementById('session-phase').className = 'text-[10px] font-bold text-primary uppercase tracking-widest mb-2';
+      if (focusLocked) document.getElementById('overlay-subject').textContent = currentSubject + ' • Focus Session';
+    }
+    updateDisplay();
+    updateSessionDots();
+    // Auto-start next
+    setTimeout(() => startTimer(), 1200);
+  }
+
+  function sessionsDone(n) {
+    document.getElementById('sessions-done').textContent = n;
+    const dots = document.querySelectorAll('.session-dot');
+    dots.forEach((d,i) => {
+      if (i < n) d.classList.add('done');
+      else if (i === n) d.classList.add('current');
+      else d.classList.remove('done','current');
+    });
+    document.querySelector('#session-dots + div').textContent = `Session ${Math.min(n+1,totalSessions)} of ${totalSessions}`;
+  }
+
+  function updateSessionDots() { sessionsDone(completedSessions); }
+
+  function allDone() {
+    document.getElementById('session-phase').textContent = '🎉 All Done!';
+    document.getElementById('timer-display').textContent = '00:00';
+    if (focusLocked) toggleFocusLock();
+  }
+
+  function addLog(subject, desc) {
+    const now = new Date();
+    const t = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    sessionLog.push({subject, desc, time: t});
+    const log = document.getElementById('session-log');
+    log.innerHTML = sessionLog.map(s => `
+      <div class="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
+        <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+        <div class="flex-1"><div class="text-sm font-semibold">${s.subject}</div><div class="text-[11px] text-slate-500">${s.desc}</div></div>
+        <div class="text-[11px] text-slate-600">${s.time}</div>
+      </div>
+    `).reverse().join('');
+  }
+
+  function toggleFocusLock() {
+    focusLocked = !focusLocked;
+    const overlay = document.getElementById('focus-overlay');
+    const lockIcon = document.getElementById('lock-icon');
+    const lockLabel = document.getElementById('lock-label');
+    if (focusLocked) {
+      overlay.classList.remove('hidden');
+      lockIcon.textContent = 'lock';
+      lockLabel.textContent = 'Locked';
+    } else {
+      overlay.classList.add('hidden');
+      lockIcon.textContent = 'lock_open';
+      lockLabel.textContent = 'Lock UI';
+    }
+  }
+
+  function setMode(mode, work, brk) {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    event.target.closest('.mode-btn').classList.add('active');
+    if (mode === 'custom') {
+      document.getElementById('custom-inputs').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('custom-inputs').classList.add('hidden');
+    workMins = work; breakMins = brk;
+    pauseTimer(); isBreak = false;
+    remaining = workMins * 60; totalSeconds = remaining;
+    updateDisplay();
+  }
+
+  function applyCustom() {
+    workMins = parseInt(document.getElementById('custom-work').value) || 25;
+    breakMins = parseInt(document.getElementById('custom-break').value) || 5;
+    if (!running) { remaining = workMins * 60; totalSeconds = remaining; updateDisplay(); }
+  }
+
+  function selectSubject(el, name) {
+    document.querySelectorAll('.subject-select-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    currentSubject = name;
+    document.getElementById('current-subject-label').textContent = name;
+    document.getElementById('overlay-subject').textContent = name + ' • Focus Session';
+  }
+
+  function toggleDark() {
+    document.documentElement.classList.toggle('dark');
+  }
+
+  // Fade in elements
+  document.querySelectorAll('.fade-in').forEach((el, i) => {
+    setTimeout(() => el.style.opacity = '1', 100 + i*80);
+  });
+
+  updateDisplay();
+
+
+
+</script>
+  <script src="js/supabase-client.js"></script>
+</body>
+</html>

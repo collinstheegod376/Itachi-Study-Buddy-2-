@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Itachi Study Buddy - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries">
+  let currentUser = null;
+
+async function initDashboard() {
+  currentUser = await Auth.requireAuth();
+  if (!currentUser) return;
+  
+  // Load real data
+  const [todaySessions, streak, summary] = await Promise.all([
+    SessionsAPI.getToday(currentUser.id),
+    StreakAPI.get(currentUser.id),
+    ProgressAPI.getSummary(currentUser.id),
+  ]);
+  
+  // Update streak badge
+  document.querySelector('[data-streak]').textContent = `${streak.current_streak} Day Streak`;
+  
+  // Update progress ring
+  const pct = summary.overall_coverage_pct;
+  const ring = document.querySelector('[data-ring]');
+  const offset = 176 - (176 * pct / 100);
+  ring.setAttribute('stroke-dashoffset', offset);
+  
+  // Render sessions
+  renderSessionCards(todaySessions);
+  
+  // Get upcoming exam (nearest)
+  if (summary.subjects.length > 0) {
+    const nearest = summary.subjects[0];
+    document.querySelector('[data-exam-name]').textContent = nearest.name.toUpperCase();
+    document.querySelector('[data-days-left]').textContent = nearest.days_remaining;
+  }
+}
+
+initDashboard();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: { extend: { colors: {
+      "primary-fixed":"#e3dfff","surface-dim":"#111319","on-surface-variant":"#c7c4d8",
+      "on-background":"#e2e2eb","background":"#111319","on-secondary":"#2b2769",
+      "on-surface":"#e2e2eb","on-secondary-container":"#b4b1fc","tertiary-fixed-dim":"#ffb785",
+      "outline":"#918fa1","surface-container-lowest":"#0c0e14","error-container":"#93000a",
+      "on-error-container":"#ffdad6","on-tertiary-container":"#461f00",
+      "surface-container-high":"#282a30","on-error":"#690005","on-secondary-fixed":"#150f54",
+      "on-primary-fixed-variant":"#3622ca","tertiary":"#ffb785","error":"#ffb4ab",
+      "surface-container":"#1e1f26","tertiary-fixed":"#ffdcc6","secondary-container":"#444183",
+      "surface-container-highest":"#33343b","on-primary-container":"#1b0091",
+      "primary-fixed-dim":"#c4c0ff","surface-container-low":"#191b22","surface-bright":"#373940",
+      "on-tertiary-fixed-variant":"#713700","on-primary":"#2000a4","secondary-fixed":"#e3dfff",
+      "on-tertiary-fixed":"#301400","outline-variant":"#464555","tertiary-container":"#db761f",
+      "secondary-fixed-dim":"#c4c0ff","surface-variant":"#33343b","inverse-primary":"#4f44e2",
+      "on-primary-fixed":"#100069","surface":"#111319","secondary":"#c4c0ff",
+      "primary-container":"#8781ff","primary":"#c4c0ff","inverse-surface":"#e2e2eb",
+      "surface-tint":"#c4c0ff","inverse-on-surface":"#2e3037","on-secondary-fixed-variant":"#413f81",
+      "on-tertiary":"#502500"
+    }, fontFamily:{"headline":["Inter"],"body":["Inter"],"label":["Inter"]},
+    borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"} }}
+  }
+</script>
+<style>
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .fade-up{animation:fadeUp 0.5s ease forwards;}
+  .nav-link{transition:all 0.2s;}
+  .nav-link:hover{background:rgba(255,255,255,0.05);}
+  .session-card{transition:all 0.2s;}
+  .session-card:hover .more-menu{opacity:1;}
+  .more-menu{opacity:0;transition:opacity 0.2s;}
+  .dropdown-menu{display:none;animation:fadeUp 0.2s ease forwards;}
+  .dropdown-menu.open{display:block;}
+</style>
+<style>body{min-height:max(884px,100dvh);}</style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container">
+
+<!-- Add Subject Modal -->
+<div id="add-modal" class="hidden fixed inset-0 z-[100] flex items-end md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick="closeModal(event)">
+  <div class="bg-[#191b22] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="font-black text-lg tracking-tight">Add Session Note</h3>
+      <button onclick="document.getElementById('add-modal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-slate-400">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Subject</label><input type="text" placeholder="e.g. Linear Algebra" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-slate-600 transition-all focus:border-primary focus:outline-none"/></div>
+      <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Topic</label><input type="text" placeholder="e.g. Eigenvalues & Eigenvectors" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-slate-600 transition-all focus:border-primary focus:outline-none"/></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Time</label><input type="time" class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all focus:border-primary focus:outline-none"/></div>
+        <div><label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Duration</label><select class="w-full bg-[#111319] border border-white/10 rounded-lg px-4 py-3 text-sm text-on-surface transition-all focus:border-primary focus:outline-none"><option>30 min</option><option selected>45 min</option><option>60 min</option><option>90 min</option><option>120 min</option></select></div>
+      </div>
+      <button class="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary-container text-[#111319] font-black text-sm uppercase tracking-widest mt-2 hover:opacity-90 transition-all active:scale-95">Add Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar (Web) -->
+<aside class="hidden md:flex h-full w-72 fixed left-0 top-0 z-[60] bg-[#191B22] flex-col p-6 gap-4 shadow-2xl">
+  <div class="mb-8"><span class="text-xs font-bold text-slate-500 tracking-[0.05em] uppercase">MONASTIC WORKSPACE</span></div>
+  <nav class="flex flex-col gap-1">
+    <a href="dashboard.html" class="flex items-center gap-4 px-4 py-3 bg-[#282A30] text-[#C4C0FF] rounded-md font-bold">
+      <span class="material-symbols-outlined">dashboard</span><span class="text-sm tracking-wide">Dashboard</span>
+    </a>
+    <a href="subjects.html" class="nav-link flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium">
+      <span class="material-symbols-outlined">menu_book</span><span class="tracking-wide">Subjects</span>
+    </a>
+    <a href="timetable.html" class="nav-link flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium">
+      <span class="material-symbols-outlined">calendar_today</span><span class="tracking-wide">Timetable</span>
+    </a>
+    <a href="focus.html" class="nav-link flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium">
+      <span class="material-symbols-outlined">timer</span><span class="tracking-wide">Focus Mode</span>
+    </a>
+    <a href="progress.html" class="nav-link flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium">
+      <span class="material-symbols-outlined">insights</span><span class="tracking-wide">Progress</span>
+    </a>
+    <a href="settings.html" class="nav-link flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-slate-200 rounded-md text-sm font-medium mt-auto">
+      <span class="material-symbols-outlined">settings</span><span class="tracking-wide">Settings</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="md:ml-72 min-h-screen pb-24 md:pb-8">
+  <header class="bg-[#111319] border-b border-white/5 flex justify-between items-center w-full px-6 h-16 sticky top-0 z-50">
+    <div class="flex items-center gap-4">
+      <button class="md:hidden text-[#C4C0FF]" onclick="toggleMobileMenu()"><span class="material-symbols-outlined">menu</span></button>
+      <h1 class="font-['Inter'] tracking-tight font-bold text-lg uppercase text-[#C4C0FF]">Dashboard</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="focus.html" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#191b22] border border-white/5 text-xs font-bold text-tertiary hover:border-white/10 transition-all">
+        <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">local_fire_department</span>12 Day Streak
+      </a>
+      <button onclick="toggleDark()" class="text-[#C4C0FF] hover:bg-[#282A30] p-2 rounded-full transition-colors"><span class="material-symbols-outlined">dark_mode</span></button>
+    </div>
+  </header>
+
+  <div class="max-w-5xl mx-auto px-6 pt-8 space-y-8">
+
+    <!-- Hero Card -->
+    <section class="fade-up relative overflow-hidden bg-[#191B22] rounded-xl p-8 md:p-12 hover:bg-[#1E2129] transition-all duration-500">
+      <div class="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none"></div>
+      <div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <span class="text-[0.6875rem] font-bold tracking-[0.05em] text-primary uppercase block mb-4">Upcoming Milestone</span>
+          <h2 class="text-4xl md:text-6xl font-black text-on-surface tracking-tighter leading-none mb-2">
+            14 DAYS UNTIL<br/>
+            <span class="bg-gradient-to-r from-primary to-primary-container bg-clip-text text-transparent">ADVANCED CALCULUS</span>
+          </h2>
+          <p class="text-slate-400 font-medium text-sm">Exam Date: December 14th, 2023 • 09:00 AM</p>
+        </div>
+        <a href="subjects.html" class="bg-gradient-to-br from-primary to-primary-container text-on-primary-container px-6 py-3 rounded-md font-bold text-sm tracking-tight hover:opacity-90 transition-all active:scale-95 whitespace-nowrap">
+          Review Syllabus
+        </a>
+      </div>
+    </section>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <a href="focus.html" class="fade-up bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-xl p-6 flex items-center justify-between group" style="animation-delay:0.1s;opacity:0">
+        <div class="space-y-1">
+          <span class="text-[10px] font-bold text-slate-500 tracking-[0.05em] uppercase">Consistency</span>
+          <div class="text-3xl font-extrabold text-on-surface">12 Day Streak</div>
+          <p class="text-xs text-slate-400">Keep it up, you're in the flow.</p>
+        </div>
+        <div class="w-14 h-14 bg-tertiary-container/20 rounded-full flex items-center justify-center text-tertiary">
+          <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1">local_fire_department</span>
+        </div>
+      </a>
+      <a href="progress.html" class="fade-up bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-xl p-6 flex items-center justify-between group" style="animation-delay:0.15s;opacity:0">
+        <div class="space-y-1">
+          <span class="text-[10px] font-bold text-slate-500 tracking-[0.05em] uppercase">Semester Goal</span>
+          <div class="text-3xl font-extrabold text-on-surface">68% Complete</div>
+          <p class="text-xs text-slate-400">142 of 210 topics mastered.</p>
+        </div>
+        <div class="relative w-16 h-16 flex items-center justify-center">
+          <svg class="w-full h-full -rotate-90">
+            <circle class="text-white/5" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="6"></circle>
+            <circle class="text-primary" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="176" stroke-dashoffset="56" stroke-width="6"></circle>
+          </svg>
+          <span class="absolute text-[10px] font-bold text-primary">68%</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Today's Sessions -->
+    <section class="fade-up space-y-6" style="animation-delay:0.2s;opacity:0">
+      <div class="flex items-center justify-between px-2">
+        <h3 class="text-xl font-bold tracking-tight text-on-surface uppercase">Today's Sessions</h3>
+        <a href="timetable.html" class="text-xs text-primary hover:underline font-medium">View Full Schedule</a>
+      </div>
+      <div class="space-y-4">
+        <!-- Session 1 -->
+        <div class="session-card bg-surface-container-low hover:bg-surface-container-lowest transition-all p-5 rounded-xl flex items-center gap-6 group cursor-pointer" onclick="window.location.href='focus.html'">
+          <div class="w-12 h-12 rounded-lg bg-[#282A30] flex flex-col items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+            <span class="text-xs font-bold leading-none">10</span><span class="text-[8px] font-bold uppercase">AM</span>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-on-surface tracking-tight">Linear Algebra</h4>
+            <p class="text-xs text-slate-500">Eigenvalues and Eigenvectors • 90 min Deep Work</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">High Priority</span>
+            <div class="relative">
+              <button onclick="toggleMenu(event,'menu1')" class="more-menu text-slate-600 hover:text-on-surface transition-colors p-1 rounded">
+                <span class="material-symbols-outlined">more_vert</span>
+              </button>
+              <div id="menu1" class="dropdown-menu absolute right-0 top-full mt-1 bg-[#282a30] border border-white/10 rounded-xl shadow-2xl z-50 min-w-[140px] py-1 overflow-hidden">
+                <a href="focus.html" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors"><span class="material-symbols-outlined text-[16px]">play_arrow</span>Start Session</a>
+                <button class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors text-left"><span class="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+                <button class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors text-left text-red-400"><span class="material-symbols-outlined text-[16px]">delete</span>Remove</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Session 2 -->
+        <div class="session-card bg-surface-container-low hover:bg-surface-container-lowest transition-all p-5 rounded-xl flex items-center gap-6 group border-l-2 border-primary cursor-pointer" onclick="window.location.href='focus.html'">
+          <div class="w-12 h-12 rounded-lg bg-[#282A30] flex flex-col items-center justify-center text-primary">
+            <span class="text-xs font-bold leading-none">02</span><span class="text-[8px] font-bold uppercase">PM</span>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-on-surface tracking-tight">Computer Architecture</h4>
+            <p class="text-xs text-slate-500">Pipelining & Cache Design • 45 min Review</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-1 rounded bg-tertiary/10 text-tertiary text-[10px] font-bold uppercase tracking-wider">Medium Priority</span>
+            <div class="relative">
+              <button onclick="toggleMenu(event,'menu2')" class="more-menu text-slate-600 hover:text-on-surface transition-colors p-1 rounded">
+                <span class="material-symbols-outlined">more_vert</span>
+              </button>
+              <div id="menu2" class="dropdown-menu absolute right-0 top-full mt-1 bg-[#282a30] border border-white/10 rounded-xl shadow-2xl z-50 min-w-[140px] py-1 overflow-hidden">
+                <a href="focus.html" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors"><span class="material-symbols-outlined text-[16px]">play_arrow</span>Start Session</a>
+                <button class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors text-left"><span class="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+                <button class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors text-left text-red-400"><span class="material-symbols-outlined text-[16px]">delete</span>Remove</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Session 3 (Completed) -->
+        <div class="bg-surface-container-low transition-all p-5 rounded-xl flex items-center gap-6 opacity-60 grayscale">
+          <div class="w-12 h-12 rounded-lg bg-[#282A30] flex flex-col items-center justify-center text-slate-400">
+            <span class="text-xs font-bold leading-none">08</span><span class="text-[8px] font-bold uppercase">AM</span>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-on-surface tracking-tight line-through">Discrete Structures</h4>
+            <p class="text-xs text-slate-500">Graph Theory Basics • Completed</p>
+          </div>
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">check_circle</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Links -->
+    <div class="fade-up grid grid-cols-2 md:grid-cols-4 gap-3" style="animation-delay:0.25s;opacity:0">
+      <a href="timetable.html" class="bg-surface-container-low hover:bg-surface-container-high transition-all p-4 rounded-xl flex flex-col gap-2 group">
+        <span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">calendar_today</span>
+        <span class="text-xs font-bold text-on-surface">View Timetable</span>
+      </a>
+      <a href="subjects.html" class="bg-surface-container-low hover:bg-surface-container-high transition-all p-4 rounded-xl flex flex-col gap-2 group">
+        <span class="material-symbols-outlined text-tertiary group-hover:scale-110 transition-transform">menu_book</span>
+        <span class="text-xs font-bold text-on-surface">My Subjects</span>
+      </a>
+      <a href="focus.html" class="bg-surface-container-low hover:bg-surface-container-high transition-all p-4 rounded-xl flex flex-col gap-2 group">
+        <span class="material-symbols-outlined text-secondary group-hover:scale-110 transition-transform">timer</span>
+        <span class="text-xs font-bold text-on-surface">Start Focus</span>
+      </a>
+      <a href="progress.html" class="bg-surface-container-low hover:bg-surface-container-high transition-all p-4 rounded-xl flex flex-col gap-2 group">
+        <span class="material-symbols-outlined text-on-surface-variant group-hover:scale-110 transition-transform">insights</span>
+        <span class="text-xs font-bold text-on-surface">My Progress</span>
+      </a>
+    </div>
+  </div>
+</main>
+
+<!-- Mobile Nav -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 pb-safe bg-[#111319]/80 backdrop-blur-md border-t border-white/5 flex justify-around items-center h-16 px-4 shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
+  <a href="dashboard.html" class="flex flex-col items-center text-[#C4C0FF]"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span><span class="text-[10px] font-medium tracking-wider uppercase mt-1">Home</span></a>
+  <a href="subjects.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">menu_book</span><span class="text-[10px] font-medium tracking-wider uppercase mt-1">Subjects</span></a>
+  <a href="focus.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">timer</span><span class="text-[10px] font-medium tracking-wider uppercase mt-1">Focus</span></a>
+  <a href="progress.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">bar_chart</span><span class="text-[10px] font-medium tracking-wider uppercase mt-1">Stats</span></a>
+  <a href="settings.html" class="flex flex-col items-center text-slate-500"><span class="material-symbols-outlined">settings</span><span class="text-[10px] font-medium tracking-wider uppercase mt-1">Settings</span></a>
+</nav>
+
+<!-- FAB -->
+<button onclick="document.getElementById('add-modal').classList.remove('hidden')" class="md:hidden fixed bottom-20 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary-container shadow-2xl flex items-center justify-center z-40 active:scale-90 transition-transform">
+  <span class="material-symbols-outlined text-3xl">add</span>
+</button>
+
+<script>
+  // Fade up elements
+  document.querySelectorAll('.fade-up').forEach((el, i) => {
+    setTimeout(() => { el.style.opacity = '1'; }, 100 + i * 100);
+  });
+
+  function toggleMenu(e, id) {
+    e.stopPropagation();
+    const menu = document.getElementById(id);
+    menu.classList.toggle('open');
+    // Close other menus
+    document.querySelectorAll('.dropdown-menu').forEach(m => { if (m.id !== id) m.classList.remove('open'); });
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('add-modal')) {
+      document.getElementById('add-modal').classList.add('hidden');
+    }
+  }
+
+  function toggleDark() { document.documentElement.classList.toggle('dark'); }
+  function toggleMobileMenu() { /* could implement mobile drawer */ }
+
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
+  });
+</script>
+  <script src="js/supabase-client.js"></script>
+</body>
+</html>
